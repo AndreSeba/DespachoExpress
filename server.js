@@ -9,6 +9,7 @@ const path = require('path');
 const { URL } = require('url');
 const { WebSocketServer } = require('ws');
 const G = require('./lib/game');
+const { botTick } = require('./lib/bots');
 
 const PORT = parseInt(process.env.PORT, 10) || 3000;
 const PUBLIC = path.join(__dirname, 'public');
@@ -90,6 +91,8 @@ function difundir(sala) {
   }
 }
 
+function tickBots(sala) { botTick(sala, () => difundir(sala)); }
+
 function programarCierre(sala) {
   clearTimeout(timers.get(sala.code));
   const r = sala.actual;
@@ -156,6 +159,8 @@ wss.on('connection', (ws) => {
         switch (m.t) {
           case 'config': G.configurar(sala, m); break;
           case 'iniciar': G.iniciarRonda(sala); programarCierre(sala); break;
+          case 'bots': G.agregarBots(sala); break;
+          case 'quitarbots': G.quitarBots(sala); break;
           case 'incidente': G.lanzarIncidente(sala); break;
           case 'cerrar': G.cerrarRonda(sala, 'manual'); clearTimeout(timers.get(sala.code)); break;
           case 'reiniciar': G.reiniciar(sala); clearTimeout(timers.get(sala.code)); break;
@@ -164,13 +169,13 @@ wss.on('connection', (ws) => {
       } else {
         switch (m.t) {
           case 'msg': G.enviarMensaje(sala, ctx.jugadorId, m); break;
-          case 'eco': G.confirmarEco(sala, ctx.jugadorId, m); break;
           case 'pedido': G.enviarPedido(sala, ctx.jugadorId, m.valores); break;
           default: return;
         }
         if (sala.actual && sala.actual.estado === 'cerrada') clearTimeout(timers.get(sala.code));
       }
       difundir(sala);
+      tickBots(sala);
     } catch (e) {
       if (e && e.publico) enviar(ws, { t: 'error', msg: e.message, codigo: e.codigo });
       else { console.error('Error interno:', e); enviar(ws, { t: 'error', msg: 'Ocurrió un error inesperado.' }); }
@@ -186,6 +191,9 @@ wss.on('connection', (ws) => {
     }
   });
 });
+
+// Los bots reevalúan cada segundo (por ejemplo, para el tiempo de espera del eco)
+setInterval(() => { for (const sala of salas.values()) if (sala.actual && sala.actual.estado === 'activa') tickBots(sala); }, 1000).unref();
 
 // Latido y limpieza
 setInterval(() => {

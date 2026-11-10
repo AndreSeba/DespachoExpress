@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1F3A5F">
+<title>Despacho Express · Panel</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="h-top">
+  <div class="brand">🚚 Despacho Express</div>
+  <button class="codigo" id="codigo" type="button" title="Copiar enlace para los jugadores" aria-label="Código de sala">····</button>
+  <span class="link" id="link"></span>
+  <span class="grow"></span>
+  <span id="conn" class="small">⏳</span>
+  <button class="btn ghost" id="nueva" type="button" style="color:#fff;border-color:rgba(255,255,255,.5);min-height:36px">＋ Sala nueva</button>
+</header>
+<div class="h-wrap">
+  <aside>
+    <div class="card"><h3>👥 Equipo</h3><div class="seats" id="seats"></div></div>
+    <div class="card"><div class="ctrl" id="ctrl"></div><div id="cfg"></div></div>
+  </aside>
+  <section>
+    <div class="tabsH" role="tablist">
+      <button id="tabVivo" class="on" role="tab" type="button">📡 En vivo</button>
+      <button id="tabCmp" role="tab" type="button">📊 Comparar</button>
+    </div>
+    <div id="vivo">
+      <div class="card strip" id="strip"></div>
+      <div class="card">
+        <svg id="cadena" viewBox="0 0 960 330" role="img" aria-label="Recorrido de la información entre los eslabones"></svg>
+        <div class="leyenda"><span>✉️ nota</span><span>🪪 tarjeta</span><span>🔊 eco</span><span>✏️ corrección</span><span>⚡ incidente</span></div>
+      </div>
+      <div class="card"><h3>🔎 Recorrido de cada dato</h3><div style="overflow:auto"><table class="heat" id="heat"></table></div><div class="det" id="det"></div></div>
+      <div class="card"><h3>🕒 Actividad</h3><div class="ticker" id="ticker"></div></div>
+    </div>
+    <div id="cmp" hidden></div>
+  </section>
+</div>
+<aside class="drawer" id="drawer" aria-label="Detalle del eslabón"></aside>
+<script src="/common.js"></script>
+<script src="/host.js"></script>
+</body>
+</html>
