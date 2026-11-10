@@ -1,11 +1,10 @@
 # Referencia para desplegar en Render (plan gratis).
-# Si usas Blueprint, copia este archivo a la raíz del repositorio; si creas el servicio a mano, usa estos mismos valores.
+# Si usas Blueprint, este archivo ya está en la raíz del repositorio; si creas el servicio a mano, usa estos mismos valores.
 services:
   - type: web
     name: despacho-express
     runtime: node
     plan: free
-    rootDir: despacho-express
     buildCommand: corepack enable && pnpm install --frozen-lockfile --prod
     startCommand: node server.js
     healthCheckPath: /health
