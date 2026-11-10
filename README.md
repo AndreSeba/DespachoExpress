@@ -49,7 +49,7 @@ Al terminar el juego, cada participante responde desde su celular 8 afirmaciones
 
 **En línea (Render, plan gratis):** crear un *Web Service* con estos valores (o usar `render.yaml`):
 - Root Directory: (vacío, la raíz del repositorio)
-- Build Command: `corepack enable && pnpm install --frozen-lockfile --prod` · Start Command: `node server.js` · Health check: `/health`
+- Build Command: `pnpm install --frozen-lockfile --prod` · Start Command: `node server.js` · Health check: `/health`
 
 Avisos del plan gratis: el servicio se duerme tras un rato sin uso y tarda cerca de un minuto en despertar (ábrelo antes de empezar), y las salas viven en memoria, así que se pierden si se reinicia. No se guarda nada en disco; al terminar, descarga el CSV.
 

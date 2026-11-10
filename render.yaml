@@ -5,6 +5,6 @@ services:
     name: despacho-express
     runtime: node
     plan: free
-    buildCommand: corepack enable && pnpm install --frozen-lockfile --prod
+    buildCommand: pnpm install --frozen-lockfile --prod
     startCommand: node server.js
     healthCheckPath: /health
