@@ -16,7 +16,7 @@ Juego cooperativo para practicar la comunicación **entre compañeros** en una c
 | Forma | Qué es | Cómo |
 |---|---|---|
 | **Demo en HTML** | Un solo archivo; juegas solo con compañeros simulados. | Abre `demo/index.html` en el navegador o súbelo a un hosting estático. |
-| **Sistema multijugador** | Cada participante en su celular y la facilitadora en el panel. | `npm install` y `npm start`; luego abre `/host`. |
+| **Sistema multijugador** | Cada participante en su celular y la facilitadora en el panel. | `pnpm install` y `pnpm start`; luego abre `/host`. |
 | **Multijugador con bots** | Para probar el panel sin 6 personas. | En el panel, botón *Completar con bots*. |
 
 ## Panel de la facilitadora (`/host`)
@@ -45,11 +45,11 @@ Al terminar el juego, cada participante responde desde su celular 8 afirmaciones
 - Con menos de 6 personas, cada una toma varios roles; las que sobran entran como observadoras.
 
 ## Despliegue
-**Local (sin internet, por WiFi):** en la laptop, `npm install && npm start`. Los celulares abren `http://IP-DE-LA-LAPTOP:3000`.
+**Local (sin internet, por WiFi):** en la laptop, `pnpm install && pnpm start`. Los celulares abren `http://IP-DE-LA-LAPTOP:3000`.
 
 **En línea (Render, plan gratis):** crear un *Web Service* con estos valores (o usar `render.yaml`):
 - Root Directory: `despacho-express`
-- Build Command: `npm install` · Start Command: `npm start` · Health check: `/health`
+- Build Command: `corepack enable && pnpm install --frozen-lockfile --prod` · Start Command: `node server.js` · Health check: `/health`
 
 Avisos del plan gratis: el servicio se duerme tras un rato sin uso y tarda cerca de un minuto en despertar (ábrelo antes de empezar), y las salas viven en memoria, así que se pierden si se reinicia. No se guarda nada en disco; al terminar, descarga el CSV.
 
@@ -57,6 +57,6 @@ Avisos del plan gratis: el servicio se duerme tras un rato sin uso y tarda cerca
 Apodos, no nombres reales. Nada se guarda en el servidor salvo la partida en memoria. Las salas se borran tras 6 horas sin actividad.
 
 ## Pruebas
-- `npm test`: lógica del juego y bots.
+- `pnpm test`: lógica del juego y bots.
 - `node test/e2e.mjs`: panel + jugador humano en celular + bots, con capturas (`SHOTS=/ruta`).
 - `node test/demo-e2e.mjs`: la demo de un solo archivo en un celular simulado.

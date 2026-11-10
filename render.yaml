@@ -6,6 +6,6 @@ services:
     runtime: node
     plan: free
     rootDir: despacho-express
-    buildCommand: npm install
-    startCommand: npm start
+    buildCommand: corepack enable && pnpm install --frozen-lockfile --prod
+    startCommand: node server.js
     healthCheckPath: /health
