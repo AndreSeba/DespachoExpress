@@ -1,0 +1,14 @@
+{
+  "name": "despacho-express",
+  "version": "1.0.0",
+  "description": "Juego cooperativo en tiempo real para practicar la comunicación entre eslabones de una cadena de despacho.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test test/"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": { "ws": "^8.18.0" },
+  "license": "UNLICENSED",
+  "private": true
+}
