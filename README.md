@@ -27,8 +27,15 @@ Pensado para mirar y tocar, con poco texto:
 - **Reloj, ronda y pedidos:** anillo de tiempo, puntos y un círculo por pedido (verde si es perfecto, naranja si tiene errores, pulsando el actual). Tocar un círculo inspecciona ese pedido.
 - **Recorrido de cada dato:** cuadrícula de 7 datos por 6 eslabones y el envío final; / / ↺ para ver dónde se perdió o cambió cada dato.
 - **Actividad:** línea de tiempo con iconos.
+- **Formulario de satisfacción:** cuando termina el juego, el panel muestra cuántos respondieron, el promedio y la distribución de cada afirmación (barras de colores) y las respuestas abiertas, sin identificar a nadie.
 - **Comparar:** ronda 1 frente a ronda 2 con barras, mapas de aciertos por pedido y el campo más errado.
 - **Controles:** ▶ iniciar ronda, incidente (o automático), ⏹ cerrar, ↺ nueva partida, ⬇ CSV, y ajustes de duración y número de pedidos.
+
+## Formulario de satisfacción (anónimo)
+Al terminar el juego, cada participante responde desde su celular 8 afirmaciones (escala de 1 a 5) y 3 preguntas abiertas.
+- No se guarda quién dio cada respuesta, solo un registro de quién ya respondió para evitar duplicados.
+- Las respuestas abiertas se muestran en orden alfabético, para no revelar el orden en que llegaron.
+- Los bots no responden. Los resultados se incluyen en el CSV, sin nombres.
 
 ## Cómo se juega (jugadores, desde el celular)
 1. Abren el enlace o escriben el código de 4 letras y un apodo (no el nombre real).

@@ -89,11 +89,22 @@ await espera(500);
 await host.screenshot({ path: `${OUT}/panel-06-comparar.png`, fullPage: true });
 await jug.screenshot({ path: `${OUT}/jugador-03-fin.png`, fullPage: true });
 
+// ---- Formulario de satisfacción (anónimo)
+await jug.waitForSelector('#encuestaCard');
+for (let i = 0; i < 8; i++) await jug.click(`label[for="it${i}_${(i % 5) + 1}"]`);
+await jug.fill('#ab0', 'Muy útil el eco');
+await jug.screenshot({ path: `${OUT}/jugador-04-formulario.png`, fullPage: true });
+await jug.click('#encuestaEnviar');
+await jug.waitForSelector('#encuestaGracias');
+await host.waitForFunction(() => /1 de 1/.test(document.getElementById('encuestaConteo')?.textContent || ''));
+await host.screenshot({ path: `${OUT}/panel-07-formulario.png`, fullPage: true });
 const csv = await (await fetch(`${base}/api/export?code=${code}&token=${await host.evaluate(() => JSON.parse(localStorage.getItem('dx_host')).token)}`)).text();
 console.log('CSV líneas:', csv.split('\n').length);
 const desborda = await host.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
 await browser.close(); server.close();
 console.log('errores:', JSON.stringify(errores));
-const ok = errores.length === 0 && csv.includes('ronda,modo') && !desborda;
+const anonimo = csv.includes('formulario_satisfaccion') && csv.includes('Muy útil el eco') && !csv.includes('Camila');
+console.log('CSV con formulario y sin nombres:', anonimo);
+const ok = errores.length === 0 && csv.includes('ronda,modo') && !desborda && anonimo;
 console.log(ok ? 'TODO OK' : 'HAY FALLOS');
 process.exit(ok ? 0 : 1);

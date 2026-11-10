@@ -120,6 +120,7 @@
       c.append(boton('bi-play-fill', `Iniciar ronda ${S.resumenes.length + 1}`, 'btn-primary btn-lg', () => enviar('iniciar'), { 'data-accion': 'iniciar' }));
     } else if (S.fase === 'final') {
       c.append(boton('bi-arrow-repeat', 'Nueva partida', 'btn-primary btn-lg', () => enviar('reiniciar'), { 'data-accion': 'reiniciar' }));
+      if (S.encuesta) c.append(el('div', { class: 'small text-body-secondary text-center' }, ic('bi-clipboard-check', 'me-1'), `Formulario: ${S.encuesta.respondieron} de ${S.encuesta.total}`));
     }
     if (S.resumenes.length) c.append(el('a', { class: 'btn btn-outline-secondary', href: `/api/export?code=${S.code}&token=${sala ? sala.token : ''}`, download: '' }, ic('bi-download', 'me-2'), 'Descargar CSV'));
     if (S.fase === 'lobby' || S.fase === 'entre') {
@@ -327,6 +328,27 @@
           ...res.map((x) => { const top = CAMPOS_ORDEN.slice().sort((p, q) => x.erroresPorCampo[q] - x.erroresPorCampo[p])[0]; return el('span', { class: 'dato' }, `R${x.numero}`, ic(ICON_CAMPO[top]), x.erroresPorCampo[top] ? `x${x.erroresPorCampo[top]}` : 'sin errores'); })),
         el('p', { class: 'small text-body-secondary mt-3 mb-0' }, 'Simulación con pocas personas y sin grupo de comparación: sirve para conversar, no para probar una mejora.'))));
     }
+    pintarEncuesta(c);
+  }
+
+  /* ---------- Formulario de satisfacción: resultados en vivo ---------- */
+  const COLORES_NOTA = ['bg-danger', 'bg-warning', 'bg-secondary', 'bg-info', 'bg-success'];
+  function pintarEncuesta(c) {
+    const e = S.encuesta; if (!e) return;
+    const pct = e.total ? Math.round(e.respondieron / e.total * 100) : 0;
+    const filas = e.items.map((it, i) => {
+      const barra = el('div', { class: 'progress', style: 'height:14px', role: 'img', 'aria-label': `Distribución de notas de la afirmación ${i + 1}` },
+        ...it.dist.map((n, k) => (n ? el('div', { class: 'progress-bar ' + COLORES_NOTA[k], style: `width:${it.n ? n / it.n * 100 : 0}%`, title: `Nota ${k + 1}: ${n}` }, String(k + 1)) : null)));
+      return el('div', { class: 'mb-3' }, el('div', { class: 'd-flex justify-content-between gap-2 small' }, el('span', {}, `${i + 1}. ${it.texto}`), el('b', { class: 'tabular' }, it.promedio == null ? '—' : it.promedio.toLocaleString('es', { minimumFractionDigits: 1, maximumFractionDigits: 2 }))), barra);
+    });
+    const abiertas = e.abiertas.map((a) => el('details', { class: 'mb-2' }, el('summary', { class: 'fw-semibold small' }, `${a.pregunta} (${a.respuestas.length})`),
+      a.respuestas.length ? el('ul', { class: 'small mt-2 mb-0' }, a.respuestas.map((r) => el('li', {}, r))) : el('div', { class: 'small text-body-secondary mt-1' }, 'Sin respuestas.')));
+    c.append(el('div', { class: 'card shadow-sm mb-3', id: 'encuestaPanel' }, el('div', { class: 'card-body' },
+      el('div', { class: 'd-flex align-items-center gap-2 mb-2' }, el('h2', { class: 'h6 text-uppercase text-body-secondary mb-0 flex-grow-1' }, ic('bi-clipboard-check', 'me-1'), 'Formulario de satisfacción'),
+        el('span', { class: 'badge text-bg-primary', id: 'encuestaConteo' }, `${e.respondieron} de ${e.total}`)),
+      el('div', { class: 'progress mb-3', style: 'height:8px', role: 'progressbar', 'aria-valuenow': pct, 'aria-valuemin': 0, 'aria-valuemax': 100 }, el('div', { class: 'progress-bar bg-primary', style: `width:${pct}%` })),
+      e.respondieron ? el('div', {}, ...filas, el('div', { class: 'small text-body-secondary mb-2' }, 'Escala de 1 (muy en desacuerdo) a 5 (muy de acuerdo). Las respuestas son anónimas.'), ...abiertas)
+        : el('p', { class: 'text-body-secondary small mb-0' }, ic('bi-hourglass-split', 'me-1'), 'Esperando respuestas de los participantes.'))));
   }
   function pedidoMapa(numero) {
     const det = detalleRonda(numero); const t = el('table', { class: 'heat' });

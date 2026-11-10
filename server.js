@@ -170,6 +170,7 @@ wss.on('connection', (ws) => {
         switch (m.t) {
           case 'msg': G.enviarMensaje(sala, ctx.jugadorId, m); break;
           case 'pedido': G.enviarPedido(sala, ctx.jugadorId, m.valores); break;
+          case 'encuesta': G.enviarEncuesta(sala, ctx.jugadorId, m); break;
           default: return;
         }
         if (sala.actual && sala.actual.estado === 'cerrada') clearTimeout(timers.get(sala.code));

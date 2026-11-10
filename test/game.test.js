@@ -169,3 +169,56 @@ test('si el puesto hace imposible la restricción, se relaja y se avisa', () => 
   assert.equal(t.restriccionRelajada, false);
   assert.ok(Object.values(t.jugadores).find((p) => p.alias === 'C').roles.includes('operativo'));
 });
+
+function salaFinal() {
+  const s = G.crearSala(new Map(), { pedidos: 1 });
+  const hs = ['A', 'B', 'C', 'D', 'E', 'F'].map((a) => G.unirse(s, a));
+  G.iniciarRonda(s); G.cerrarRonda(s, 'manual'); G.iniciarRonda(s); G.cerrarRonda(s, 'manual');
+  return { s, hs };
+}
+
+test('formulario: solo se abre al final y valida las respuestas', () => {
+  const s = G.crearSala(new Map());
+  const a = G.unirse(s, 'A');
+  assert.throws(() => G.enviarEncuesta(s, a.id, { likert: [5, 5, 5, 5, 5, 5, 5, 5], abiertas: [] }), /cuando termina/);
+  const { s: f, hs } = salaFinal();
+  assert.equal(f.fase, 'final');
+  assert.throws(() => G.enviarEncuesta(f, hs[0].id, { likert: [5, 5, 5], abiertas: [] }), /8 afirmaciones/);
+  assert.throws(() => G.enviarEncuesta(f, hs[0].id, { likert: [5, 5, 5, 5, 5, 5, 5, 6], abiertas: [] }), /8 afirmaciones/);
+  G.enviarEncuesta(f, hs[0].id, { likert: [5, 4, 3, 2, 1, 5, 4, 3], abiertas: ['Muy útil', '', 'Confirmar datos'] });
+  assert.throws(() => G.enviarEncuesta(f, hs[0].id, { likert: [5, 5, 5, 5, 5, 5, 5, 5], abiertas: [] }), /Ya enviaste/);
+});
+
+test('formulario: promedios, distribución y anonimato en el resumen y el CSV', () => {
+  const { s, hs } = salaFinal();
+  G.enviarEncuesta(s, hs[0].id, { likert: [5, 5, 5, 5, 5, 5, 5, 5], abiertas: ['Zeta útil', 'Más tiempo', ''] });
+  G.enviarEncuesta(s, hs[1].id, { likert: [3, 3, 3, 3, 3, 3, 3, 3], abiertas: ['Alfa útil', '', ''] });
+  const r = G.resumenEncuesta(s);
+  assert.equal(r.respondieron, 2);
+  assert.equal(r.total, 6);
+  assert.equal(r.items[0].promedio, 4);
+  assert.deepEqual(r.items[0].dist, [0, 0, 1, 0, 1]);
+  assert.deepEqual(r.abiertas[0].respuestas, ['Alfa útil', 'Zeta útil']); // orden alfabético, no por llegada
+  assert.ok(!JSON.stringify(r).includes(hs[0].id), 'no debe aparecer ningún identificador de jugador');
+  const csv = G.exportarCSV(s);
+  assert.match(csv, /formulario_satisfaccion/);
+  assert.match(csv, /respuestas_abiertas/);
+  assert.ok(!csv.includes(hs[0].token));
+  const snapJ = G.snapshot(s, { tipo: 'jugador', jugadorId: hs[0].id });
+  assert.equal(snapJ.encuesta.hecha, true);
+  assert.equal(G.snapshot(s, { tipo: 'jugador', jugadorId: hs[2].id }).encuesta.hecha, false);
+  assert.equal(G.snapshot(s, { tipo: 'host' }).encuesta.respondieron, 2);
+});
+
+test('formulario: los bots no responden y reiniciar lo borra', () => {
+  const s = G.crearSala(new Map(), { pedidos: 1 });
+  G.unirse(s, 'A'); G.agregarBots(s);
+  G.iniciarRonda(s); G.cerrarRonda(s, 'manual'); G.iniciarRonda(s); G.cerrarRonda(s, 'manual');
+  const bot = Object.values(s.jugadores).find((p) => p.bot);
+  assert.throws(() => G.enviarEncuesta(s, bot.id, { likert: [5, 5, 5, 5, 5, 5, 5, 5], abiertas: [] }), /bots/);
+  assert.equal(G.resumenEncuesta(s).total, 1);
+  const humano = Object.values(s.jugadores).find((p) => !p.bot);
+  G.enviarEncuesta(s, humano.id, { likert: [4, 4, 4, 4, 4, 4, 4, 4], abiertas: [] });
+  G.reiniciar(s);
+  assert.equal(G.resumenEncuesta(s).respondieron, 0);
+});

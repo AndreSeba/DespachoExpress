@@ -97,7 +97,45 @@
         el('div', { class: 'progress my-2', role: 'progressbar', 'aria-valuenow': res.puntos, 'aria-valuemin': 0, 'aria-valuemax': res.max }, el('div', { class: 'progress-bar bg-primary', style: `width:${res.puntos / res.max * 100}%` })),
         el('span', { class: 'dato' }, ic('bi-check-circle'), `${res.perfectos} perfectos`), el('span', { class: 'dato' }, ic('bi-envelope'), `${res.mensajes} mensajes`), el('span', { class: 'dato' }, ic('bi-pencil'), `${res.correcciones} correcciones`)));
     }
+    if (S.fase === 'final' && S.encuesta) nodos.push(formularioEncuesta());
     $app.replaceChildren(...nodos);
+  }
+
+  /* ---------- Formulario de satisfacción (anónimo) ---------- */
+  let encNodo = null;
+  function formularioEncuesta() {
+    const e = S.encuesta;
+    if (e.hecha) {
+      encNodo = null;
+      return tarjeta(null, el('div', { class: 'text-center py-3', id: 'encuestaGracias' }, ic('bi-check-circle-fill', 'fs-1 text-success'),
+        el('h2', { class: 'h5 mt-2' }, 'Gracias por responder'), el('p', { class: 'text-body-secondary small mb-0' }, 'Tu respuesta es anónima: no se guarda quién la envió.')));
+    }
+    if (encNodo) return encNodo;
+    const est = { likert: e.items.map(() => 0), abiertas: e.preguntas.map(() => '') };
+    const enviar = el('button', { type: 'button', class: 'btn btn-primary btn-lg w-100', id: 'encuestaEnviar', disabled: true, onclick: () => {
+      net.enviar({ t: 'encuesta', likert: est.likert, abiertas: est.abiertas });
+    } }, ic('bi-send', 'me-2'), 'Enviar formulario');
+    const refrescar = () => { enviar.disabled = !est.likert.every((n) => n > 0); };
+    const filas = e.items.map((texto, i) => {
+      const grupo = el('div', { class: 'btn-group w-100', role: 'group', 'aria-label': texto });
+      for (let n = 1; n <= 5; n++) {
+        const id = `it${i}_${n}`;
+        const radio = el('input', { type: 'radio', class: 'btn-check', name: 'it' + i, id, autocomplete: 'off' });
+        radio.addEventListener('change', () => { est.likert[i] = n; refrescar(); });
+        grupo.append(radio, el('label', { class: 'btn btn-outline-primary', for: id }, String(n)));
+      }
+      return el('div', { class: 'mb-3' }, el('div', { class: 'small fw-semibold mb-1' }, `${i + 1}. ${texto}`), grupo);
+    });
+    const abiertas = e.preguntas.map((q, i) => {
+      const ta = el('textarea', { class: 'form-control', rows: '2', maxlength: '300', id: 'ab' + i, 'aria-label': q });
+      ta.addEventListener('input', () => { est.abiertas[i] = ta.value; });
+      return el('div', { class: 'mb-3' }, el('label', { class: 'form-label small fw-semibold', for: 'ab' + i }, q), ta);
+    });
+    encNodo = tarjeta('Formulario de satisfacción',
+      el('p', { class: 'small text-body-secondary' }, 'Anónimo. Escala: 1 = muy en desacuerdo, 5 = muy de acuerdo.'),
+      ...filas, ...abiertas, enviar);
+    encNodo.id = 'encuestaCard';
+    return encNodo;
   }
 
   function pantallaJuego(r, rol) {
