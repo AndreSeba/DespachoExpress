@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1F3A5F">
+<title>Despacho Express · Demo</title>
+<style>
+:root{
+  --navy:#1F3A5F; --navy2:#2B4C7A; --orange:#E07A2F; --bg:#F3F6FA; --card:#FFFFFF; --ink:#1B2A3A;
+  --muted:#5B6B7B; --ok:#1F8A5B; --bad:#C0392B; --line:#DCE3EC; --tint:#EAF0F8; --warn:#FFF4E5;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#101722; --card:#182231; --ink:#EAF0F8; --muted:#9FB0C3; --line:#2A3A50; --tint:#1F2D42; --warn:#3A2B15; --navy:#2B4C7A; --navy2:#38609A; }
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45;-webkit-text-size-adjust:100%}
+#top{position:sticky;top:0;z-index:5;background:var(--navy);color:#fff;padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;display:flex;align-items:center;gap:10px;justify-content:space-between}
+#top .brand{font-weight:800;letter-spacing:.2px}
+#top .meta{font-size:.82rem;opacity:.9;text-align:right}
+#progress{height:4px;background:rgba(255,255,255,.25)}
+#progress i{display:block;height:100%;width:0;background:var(--orange);transition:width .3s}
+main{max-width:640px;margin:0 auto;padding:16px 16px calc(env(safe-area-inset-bottom) + 32px)}
+h1{font-size:1.6rem;line-height:1.2;margin:.2rem 0 .4rem}
+h2{font-size:1.2rem;margin:.2rem 0 .5rem}
+h3{font-size:1rem;margin:.1rem 0 .4rem}
+p{margin:.4rem 0}
+.muted{color:var(--muted)}
+.small{font-size:.86rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:12px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.card.warn{background:var(--warn);border-color:var(--orange)}
+.hero{background:var(--navy);color:#fff;border-radius:var(--r);padding:18px;margin:4px 0 12px}
+.hero p{opacity:.92}
+.grid{display:grid;gap:10px}
+.roles{grid-template-columns:1fr}
+@media(min-width:480px){.roles{grid-template-columns:1fr 1fr}}
+.rolebtn{all:unset;box-sizing:border-box;cursor:pointer;display:block;background:var(--card);border:2px solid var(--line);border-radius:var(--r);padding:12px;min-height:76px}
+.rolebtn:focus-visible,.btn:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--orange);outline-offset:2px}
+.rolebtn:active{transform:scale(.99)}
+.rolebtn b{display:block;color:var(--navy)}
+.rolebtn span{font-size:.84rem;color:var(--muted)}
+.btn{all:unset;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:12px 18px;border-radius:12px;font-weight:700;cursor:pointer;text-align:center;width:100%}
+.btn-primary{background:var(--orange);color:#fff}
+.btn-primary:active{filter:brightness(.92)}
+.btn-ghost{background:transparent;color:var(--navy2);border:2px solid var(--line)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>*{flex:1 1 140px}
+.badge{display:inline-block;background:var(--tint);color:var(--navy2);border-radius:999px;padding:3px 10px;font-size:.78rem;font-weight:700}
+.badge.new{background:var(--orange);color:#fff}
+.badge.ok{background:var(--ok);color:#fff}
+.badge.bad{background:var(--bad);color:#fff}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line)}
+.kv:last-child{border-bottom:0}
+.kv b{text-align:right}
+label.field{display:block;margin:10px 0}
+label.field>span{display:block;font-size:.85rem;font-weight:700;margin-bottom:4px}
+select,textarea,input[type=text]{width:100%;min-height:46px;padding:10px 12px;font:inherit;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:10px}
+textarea{min-height:72px;resize:vertical}
+.check{display:flex;align-items:center;gap:12px;min-height:48px;padding:6px 8px;border:1px solid var(--line);border-radius:10px;margin:6px 0;background:var(--card)}
+.check input{width:22px;height:22px;flex:none}
+.check div{flex:1}
+.note{background:var(--tint);border-left:4px solid var(--navy2);border-radius:8px;padding:10px 12px;margin:8px 0}
+.note small{display:block;color:var(--muted)}
+.feed{max-height:210px;overflow:auto}
+.feed p{margin:4px 0;font-size:.9rem}
+.resrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.resrow:last-child{border-bottom:0}
+.resrow .v{font-size:.88rem;text-align:right}
+.bar{height:14px;border-radius:8px;background:var(--tint);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--navy2)}
+.bar.r2 i{background:var(--orange)}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{padding:8px 6px;text-align:left;border-bottom:1px solid var(--line)}
+th{font-size:.8rem;color:var(--muted)}
+td.num,th.num{text-align:right}
+th.num,td.num{white-space:nowrap}
+.steps{counter-reset:s;padding:0;list-style:none}
+.steps li{counter-increment:s;position:relative;padding:8px 8px 8px 42px;margin:6px 0;background:var(--tint);border-radius:10px}
+.steps li::before{content:counter(s);position:absolute;left:10px;top:8px;width:24px;height:24px;border-radius:50%;background:var(--orange);color:#fff;font-weight:800;font-size:.85rem;display:flex;align-items:center;justify-content:center}
+pre.tarjeta{white-space:pre-wrap;background:var(--tint);border:1px dashed var(--navy2);border-radius:10px;padding:12px;font:inherit;font-size:.92rem}
+.spin{display:inline-block;width:16px;height:16px;border:3px solid var(--line);border-top-color:var(--orange);border-radius:50%;animation:sp .8s linear infinite;vertical-align:-3px;margin-right:6px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.spin{animation:none}#progress i{transition:none}}
+.sr{position:absolute;left:-9999px}
+footer{max-width:640px;margin:0 auto;padding:0 16px 24px;color:var(--muted);font-size:.8rem}
+</style>
+</head>
+<body>
+<div id="top" role="banner">
+  <div class="brand">Despacho Express</div>
+  <div class="meta" id="meta">Demo</div>
+</div>
+<div id="progress" aria-hidden="true"><i id="bar"></i></div>
+<main id="app" aria-live="polite"></main>
+<footer>Demo con compañeros simulados y datos ficticios. Sirve para entender la dinámica; sus resultados no prueban una mejora en el trabajo real.</footer>
+
+<script>
+'use strict';
+/* ====== Datos del juego ====== */
+const ROLES = [
+  { id:'atencion', nombre:'Atención al cliente', campos:['destino','horario'], desc:'Primer eslabón. Conoces el destino y la hora de salida.' },
+  { id:'planificacion', nombre:'Planificación', campos:['producto','cantidad'], desc:'Defines producto y cantidad.' },
+  { id:'almacen', nombre:'Almacén', campos:['anden'], desc:'Sabes en qué andén se carga.' },
+  { id:'transporte', nombre:'Transporte', campos:['unidad'], desc:'Sabes qué unidad lleva el pedido.' },
+  { id:'seguridad', nombre:'Seguridad', campos:['restriccion'], desc:'Conoces la restricción de la carga.' },
+  { id:'operativo', nombre:'Operativo', campos:[], desc:'Último eslabón. Armas y envías el despacho completo.' },
+];
+const CAMPOS = {
+  producto:{label:'Producto',op:['Café soluble','Galletas','Leche en polvo','Cereal','Chocolate en barra','Bebida láctea']},
+  cantidad:{label:'Cantidad (cajas)',op:['40','60','80','120','200']},
+  anden:{label:'Andén',op:['A1','A2','A3','A4']},
+  unidad:{label:'Unidad',op:['Camión 1','Camión 2','Camión 3','Camión 4']},
+  restriccion:{label:'Restricción',op:['Sin restricción','No apilar','Mantener fresco','Requiere precinto']},
+  destino:{label:'Destino',op:['Supermercado Norte','Tienda Equipetrol','Distribuidor Plan 3000','Cliente Cochabamba','Cliente La Paz']},
+  horario:{label:'Hora de salida',op:['06:30','08:00','09:30','11:00','13:30','15:00']},
+};
+const CAMPO_IDS = Object.keys(CAMPOS);
+const DUENO = {}; ROLES.forEach((r,i)=>r.campos.forEach(c=>DUENO[c]=i));
+const INCIDENTE_TXT = {
+  unidad:'Paro de transporte: cambia la unidad asignada.', horario:'El cliente cambia la hora de salida.',
+  anden:'Mantenimiento: cambia el andén de carga.', restriccion:'Inspección: cambia la restricción de la carga.',
+  destino:'El cliente cambia el punto de entrega.', cantidad:'Se corrige la cantidad del pedido.',
+};
+const PEDIDOS_POR_RONDA = 4, BONUS = 3, MAXP = CAMPO_IDS.length + BONUS;
+const RIESGOS = ['Sin riesgo','Puede cambiar','Falta confirmar'];
+
+/* ====== Utilidades ====== */
+const qs = new URLSearchParams(location.search);
+const FAST = qs.get('fast') === '1';
+let semilla = Number(qs.get('seed')) || Math.floor(Math.random()*1e9);
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+let rng = mulberry32(semilla);
+const pick = a => a[Math.floor(rng()*a.length)];
+const otro = (c,v) => pick(CAMPOS[c].op.filter(x=>x!==v));
+const sleep = ms => new Promise(r=>setTimeout(r, FAST?0:ms));
+function el(tag, props, ...kids){
+  const n = document.createElement(tag);
+  for(const [k,v] of Object.entries(props||{})){
+    if(k==='class') n.className=v; else if(k==='html') n.innerHTML=v;
+    else if(k.startsWith('on')) n.addEventListener(k.slice(2), v);
+    else if(v===true) n.setAttribute(k,''); else if(v!==false && v!=null) n.setAttribute(k,v);
+  }
+  for(const k of kids.flat()){ if(k==null||k===false) continue; n.append(k.nodeType?k:document.createTextNode(k)); }
+  return n;
+}
+const $app = document.getElementById('app');
+function pantalla(...nodes){ $app.replaceChildren(...nodes.flat().filter(Boolean)); window.scrollTo({top:0}); }
+function cabecera(meta, prog){ document.getElementById('meta').textContent = meta; document.getElementById('bar').style.width = (prog||0)+'%'; }
+function esperar(boton){ return new Promise(res => boton.addEventListener('click', res, {once:true})); }
+function promesaBoton(texto, opts={}){
+  const b = el('button',{class:'btn '+(opts.ghost?'btn-ghost':'btn-primary'),type:'button','data-primary':opts.ghost?null:'1'}, texto);
+  return b;
+}
+
+/* ====== Estado ====== */
+const E = { rol:0, stats:{} };
+const nombreRol = i => ROLES[i].nombre;
+
+function nuevoPedido(n){
+  const real = {}; CAMPO_IDS.forEach(c => real[c] = pick(CAMPOS[c].op));
+  return { n, real, original:{...real}, incidente:null };
+}
+function aplicarIncidente(ped){
+  const c = pick(CAMPO_IDS);
+  const anterior = ped.real[c], nuevo = otro(c, anterior);
+  ped.real[c] = nuevo; ped.incidente = { campo:c, anterior, nuevo };
+}
+
+/* ====== Componentes de UI ====== */
+function tarjetaDatos(ped){
+  const mis = ROLES[E.rol].campos;
+  const filas = mis.length
+    ? mis.map(c => el('div',{class:'kv'}, el('span',{},CAMPOS[c].label), el('b',{}, ped.real[c], ' ', ped.incidente && ped.incidente.campo===c ? el('span',{class:'badge new'},'NUEVO') : null)))
+    : [el('p',{class:'muted'},'No conoces ningún dato por tu cuenta: dependes de lo que te cuenten tus compañeros.')];
+  return el('section',{class:'card'}, el('h3',{},'Tus datos del pedido ' + ped.n), ...filas);
+}
+function avisoIncidente(ped){
+  if(!ped.incidente) return null;
+  const c = ped.incidente.campo, d = DUENO[c];
+  return el('div',{class:'card warn'}, el('b',{},'⚠ Incidente: '), INCIDENTE_TXT[c], ' ',
+    d===E.rol ? 'Tu dato cambió.' : 'Lo conoce ' + nombreRol(d) + '.');
+}
+function textoCampos(campos){
+  const k = Object.keys(campos);
+  return k.length ? k.map(c => CAMPOS[c].label + ': ' + campos[c]).join(' · ') : '(sin datos)';
+}
+function selectCampo(c, valor, nombre){
+  const s = el('select',{name:nombre||c,'aria-label':CAMPOS[c].label,'data-campo':c});
+  s.append(el('option',{value:''},'Elige…'));
+  CAMPOS[c].op.forEach(o => s.append(el('option',{value:o, selected: o===valor}, o)));
+  return s;
+}
+function leerSelects(raiz){
+  const out = {}; raiz.querySelectorAll('select[data-campo]').forEach(s => { if(s.value) out[s.dataset.campo] = s.value; });
+  return out;
+}
+function barraRonda(ronda, ped, idx){
+  cabecera(`Ronda ${ronda} · Pedido ${ped.n}/${PEDIDOS_POR_RONDA} · ${nombreRol(E.rol)}`, ((ronda-1)*PEDIDOS_POR_RONDA + idx) / (2*PEDIDOS_POR_RONDA) * 100);
+}
+
+/* ====== Pantallas ====== */
+async function intro(){
+  cabecera('Demo', 0);
+  const lista = el('div',{class:'grid roles'});
+  const elegido = {i:null};
+  const go = promesaBoton('Empezar la demo'); go.disabled = true;
+  ROLES.forEach((r,i) => {
+    const b = el('button',{class:'rolebtn',type:'button','data-rol':r.id,'aria-pressed':'false'}, el('b',{},r.nombre), el('span',{},r.desc));
+    b.addEventListener('click', () => {
+      elegido.i = i; go.disabled = false;
+      lista.querySelectorAll('.rolebtn').forEach(x => { x.style.borderColor='var(--line)'; x.setAttribute('aria-pressed','false'); });
+      b.style.borderColor = 'var(--orange)'; b.setAttribute('aria-pressed','true');
+    });
+    lista.append(b);
+  });
+  pantalla(
+    el('div',{class:'hero'}, el('h1',{},'Despacho Express'), el('p',{},'Un juego de 2 rondas para ver cómo se pierde la información entre compañeros y cómo mejorarlo con una tarjeta de traspaso y el eco.')),
+    el('section',{class:'card'}, el('h3',{},'¿Cómo funciona?'),
+      el('ol',{class:'steps'},
+        el('li',{},'Cada compañero conoce solo una parte de un pedido de despacho.'),
+        el('li',{},[el('b',{},'Ronda 1: '),'solo se pasan notas hacia adelante, sin poder preguntar.']),
+        el('li',{},[el('b',{},'Ronda 2: '),'se usa la tarjeta de traspaso y el eco (repetir lo entendido).']),
+        el('li',{},'Al final se comparan las dos rondas.')),
+      el('p',{class:'small muted'},'Tus compañeros son simulados. La partida dura unos 5 minutos.')),
+    el('h2',{},'Elige tu rol'), lista, el('div',{style:'height:10px'}), go);
+  await esperar(go);
+  E.rol = elegido.i;
+}
+
+async function briefing(ronda){
+  cabecera(`Ronda ${ronda} · ${nombreRol(E.rol)}`, (ronda-1)*50);
+  const reglas = ronda===1
+    ? [el('li',{},'Solo puedes pasar una nota al siguiente eslabón de la cadena.'),
+       el('li',{},'No puedes preguntar ni recibir respuestas.'),
+       el('li',{},'El Operativo arma el despacho con lo que le llegue.')]
+    : [el('li',{},'Cada eslabón publica una tarjeta de traspaso: qué, cuándo y riesgo.'),
+       el('li',{},'El Operativo repite el despacho en voz alta (eco).'),
+       el('li',{},'Cada dueño del dato corrige lo que esté mal antes de enviar.')];
+  const b = promesaBoton(ronda===1 ? 'Empezar ronda 1' : 'Empezar ronda 2');
+  pantalla(el('section',{class:'card'}, el('span',{class:'badge'},'Ronda '+ronda+' de 2'),
+    el('h2',{}, ronda===1 ? 'Solo hacia adelante' : 'Conversar y confirmar'),
+    el('p',{class:'muted'}, 'Cadena: ' + ROLES.map(r=>r.nombre).join(' → ')),
+    el('ol',{class:'steps'}, ...reglas),
+    el('p',{class:'small'},'Tu rol: ', el('b',{},nombreRol(E.rol)), '.')), b);
+  await esperar(b);
+}
+
+/* ---- Ronda 1 ---- */
+function botNota(i, entrante, ped, trace){
+  const out = {};
+  Object.keys(entrante).forEach(c => {
+    const x = rng();
+    if(x < 0.25){ trace.push({etapa:i,campo:c,tipo:'omitido'}); }
+    else if(x < 0.35){ out[c] = otro(c, entrante[c]); trace.push({etapa:i,campo:c,tipo:'cambiado'}); }
+    else out[c] = entrante[c];
+  });
+  ROLES[i].campos.forEach(c => out[c] = ped.real[c]);
+  return out;
+}
+
+async function turnoR1(ronda, ped, idx){
+  const notas = new Array(ROLES.length).fill(null);
+  const trace = [];
+  const feed = el('div',{class:'card feed','aria-label':'Actividad'}, el('h3',{},'Actividad'));
+  const log = t => { feed.append(el('p',{},t)); feed.scrollTop = feed.scrollHeight; };
+  let enviado = null, notaJugador = null;
+
+  for(let i=0;i<ROLES.length;i++){
+    const rol = ROLES[i], entrante = i>0 ? (notas[i-1]||{}) : {};
+    if(i === E.rol){
+      barraRonda(ronda, ped, idx);
+      if(rol.id === 'operativo'){
+        const form = el('div',{});
+        CAMPO_IDS.forEach(c => form.append(el('label',{class:'field'}, el('span',{},CAMPOS[c].label), selectCampo(c, entrante[c]))));
+        const b = promesaBoton('Enviar despacho');
+        pantalla(avisoIncidente(ped), tarjetaDatos(ped),
+          el('section',{class:'card'}, el('h3',{},'Nota recibida de ' + nombreRol(i-1)),
+            el('div',{class:'note'}, textoCampos(entrante)),
+            el('p',{class:'small muted'},'Completa lo que falte con tu mejor criterio. Los datos faltantes se marcan como errores si adivinas mal.')),
+          el('section',{class:'card'}, el('h3',{},'Arma el despacho'), form), b, feed);
+        await esperar(b);
+        enviado = {}; const sel = leerSelects(form);
+        CAMPO_IDS.forEach(c => { enviado[c] = sel[c] || pick(CAMPOS[c].op); if(!sel[c]) trace.push({etapa:i,campo:c,tipo:'adivinado'}); });
+      } else {
+        const conocidos = {...entrante}; rol.campos.forEach(c => conocidos[c] = ped.real[c]);
+        const checks = el('div',{});
+        const box = {};
+        Object.keys(conocidos).forEach(c => {
+          const cb = el('input',{type:'checkbox',checked:true,id:'c_'+c}); box[c]=cb;
+          checks.append(el('label',{class:'check',for:'c_'+c}, cb, el('div',{}, el('b',{},CAMPOS[c].label), ': ', conocidos[c])));
+        });
+        const texto = el('textarea',{placeholder:'Mensaje opcional para el siguiente eslabón',maxlength:'140','aria-label':'Mensaje opcional'});
+        const b = promesaBoton('Enviar nota a ' + nombreRol(i+1));
+        pantalla(avisoIncidente(ped), tarjetaDatos(ped),
+          i>0 ? el('section',{class:'card'}, el('h3',{},'Nota recibida de ' + nombreRol(i-1)), el('div',{class:'note'}, textoCampos(entrante))) : null,
+          el('section',{class:'card'}, el('h3',{},'Tu nota para ' + nombreRol(i+1)),
+            el('p',{class:'small muted'},'Marca los datos que quieres pasar. No podrás preguntar ni corregir después.'), checks,
+            el('label',{class:'field'}, el('span',{},'Mensaje (opcional)'), texto)), b, feed);
+        await esperar(b);
+        const out = {};
+        Object.keys(conocidos).forEach(c => { if(box[c].checked) out[c] = conocidos[c]; else trace.push({etapa:i,campo:c,tipo:'omitido',tuyo:true}); });
+        notas[i] = out; notaJugador = out;
+        log('Enviaste tu nota a ' + nombreRol(i+1) + '.');
+      }
+    } else {
+      if(rol.id === 'operativo'){
+        enviado = {};
+        CAMPO_IDS.forEach(c => { if(entrante[c]!=null) enviado[c] = entrante[c]; else { enviado[c] = pick(CAMPOS[c].op); trace.push({etapa:i,campo:c,tipo:'adivinado'}); } });
+        log(nombreRol(i) + ' armó el despacho con lo que le llegó.');
+      } else {
+        notas[i] = botNota(i, entrante, ped, trace);
+        if(i === E.rol - 1) log(nombreRol(i) + ' te pasó su nota.');
+        else log(nombreRol(i) + ' pasó su nota a ' + nombreRol(i+1) + '.');
+      }
+      if(E.rol > i){ pantalla(avisoIncidente(ped), tarjetaDatos(ped), el('div',{class:'card'},el('span',{class:'spin'}), 'Los eslabones anteriores están trabajando…'), feed); barraRonda(ronda, ped, idx); }
+      else { pantalla(avisoIncidente(ped), tarjetaDatos(ped), el('div',{class:'card'},el('span',{class:'spin'}), 'Tu nota ya salió. El resto de la cadena está trabajando…'), feed); }
+      await sleep(450);
+    }
+  }
+  return { enviado, trace, notas, correcciones:[], notasPasadas:ROLES.length-1 };
+}
+
+/* ---- Ronda 2 ---- */
+async function turnoR2(ronda, ped, idx){
+  const tarjetas = {};
+  const trace = [], correcciones = [];
+  const feed = el('div',{class:'card feed','aria-label':'Actividad'}, el('h3',{},'Mesa de coordinación'));
+  const log = t => { feed.append(el('p',{},t)); feed.scrollTop = feed.scrollHeight; };
+
+  // 1) Tarjetas de traspaso de los bots
+  ROLES.forEach((r,i) => {
+    if(i===E.rol || r.id==='operativo') return;
+    const t = {};
+    r.campos.forEach(c => {
+      const incidenteAqui = ped.incidente && ped.incidente.campo===c;
+      if(incidenteAqui && rng() < 0.6){ t[c] = ped.incidente.anterior; trace.push({etapa:i,campo:c,tipo:'desactualizado'}); }
+      else if(rng() < 0.10){ t[c] = otro(c, ped.real[c]); trace.push({etapa:i,campo:c,tipo:'cambiado'}); }
+      else t[c] = ped.real[c];
+    });
+    tarjetas[i] = t;
+  });
+
+  // 2) Tu tarjeta
+  barraRonda(ronda, ped, idx);
+  if(ROLES[E.rol].id !== 'operativo'){
+    const mis = ROLES[E.rol].campos, form = el('div',{});
+    mis.forEach(c => {
+      const stale = ped.incidente && ped.incidente.campo===c;
+      form.append(el('label',{class:'field'}, el('span',{},'QUÉ · ' + CAMPOS[c].label), selectCampo(c, stale ? ped.incidente.anterior : ped.real[c])));
+    });
+    const cuando = el('select',{'aria-label':'Cuándo'}, el('option',{},'Antes de la salida'), el('option',{},'Ahora mismo'));
+    const riesgo = el('select',{'aria-label':'Riesgo'}); RIESGOS.forEach(x => riesgo.append(el('option',{},x)));
+    const b = promesaBoton('Publicar mi tarjeta');
+    pantalla(avisoIncidente(ped), tarjetaDatos(ped),
+      el('section',{class:'card'}, el('h3',{},'Tu tarjeta de traspaso'),
+        el('p',{class:'small muted'},'Revisa bien tu dato: tu compañero lo usará tal cual.'), form,
+        el('label',{class:'field'}, el('span',{},'CUÁNDO'), cuando), el('label',{class:'field'}, el('span',{},'RIESGO'), riesgo)), b, feed);
+    await esperar(b);
+    const sel = leerSelects(form); const t = {};
+    mis.forEach(c => { t[c] = sel[c] || ped.real[c]; if(t[c] !== ped.real[c]) trace.push({etapa:E.rol,campo:c,tipo:'desactualizado',tuyo:true}); });
+    tarjetas[E.rol] = t;
+    log('Publicaste tu tarjeta: ' + textoCampos(t) + '.');
+  }
+  ROLES.forEach((r,i) => { if(i!==E.rol && r.id!=='operativo') log(r.nombre + ' publicó: ' + textoCampos(tarjetas[i]) + '.'); });
+
+  // 3) Operativo compila y hace eco
+  const compilado = {};
+  CAMPO_IDS.forEach(c => compilado[c] = tarjetas[DUENO[c]][c]);
+  let enviado;
+
+  if(ROLES[E.rol].id === 'operativo'){
+    const form = el('div',{});
+    CAMPO_IDS.forEach(c => form.append(el('label',{class:'field'}, el('span',{},CAMPOS[c].label + ' (de ' + nombreRol(DUENO[c]) + ')'), selectCampo(c, compilado[c]))));
+    const eco = promesaBoton('Leer el eco en voz alta');
+    const enviar = promesaBoton('Enviar despacho');
+    pantalla(avisoIncidente(ped), el('section',{class:'card'}, el('h3',{},'Arma el despacho con las tarjetas'),
+      el('p',{class:'small muted'},'Antes de enviar, lee el eco: cada dueño del dato puede corregirte.'), form), eco, el('div',{style:'height:8px'}), feed);
+    await esperar(eco);
+    log('Eco del Operativo: ' + textoCampos(leerSelects(form)));
+    const actual = leerSelects(form);
+    for(const c of CAMPO_IDS){
+      if((actual[c]||compilado[c]) !== ped.real[c] && rng() < 0.8){
+        const sel = form.querySelector(`select[data-campo="${c}"]`); sel.value = ped.real[c];
+        log(nombreRol(DUENO[c]) + ' corrige: ' + CAMPOS[c].label + ' es ' + ped.real[c] + '.');
+        correcciones.push({campo:c, de:actual[c]||compilado[c], a:ped.real[c], por:nombreRol(DUENO[c])});
+      }
+    }
+    await sleep(300);
+    pantalla(avisoIncidente(ped), el('section',{class:'card'}, el('h3',{},'Despacho tras el eco'), form), el('div',{class:'card'}, el('b',{},correcciones.length), ' corrección(es) por eco.'), enviar, feed);
+    await esperar(enviar);
+    enviado = {}; const fin = leerSelects(form);
+    CAMPO_IDS.forEach(c => { enviado[c] = fin[c] || compilado[c]; });
+  } else {
+    // Eco: el Operativo (bot) lee el despacho; el jugador revisa sus datos
+    const mis = ROLES[E.rol].campos;
+    log('Eco del Operativo: ' + textoCampos(compilado));
+    const decisiones = {};
+    const lista = el('div',{});
+    mis.forEach(c => {
+      const bien = el('input',{type:'radio',name:'e_'+c,value:'ok',checked:true,id:'ok_'+c});
+      const mal = el('input',{type:'radio',name:'e_'+c,value:'mal',id:'mal_'+c});
+      decisiones[c] = {bien, mal};
+      lista.append(el('div',{class:'card'}, el('div',{class:'kv'}, el('span',{},CAMPOS[c].label), el('b',{},compilado[c])),
+        el('label',{class:'check',for:'ok_'+c}, bien, el('div',{},'Está bien')),
+        el('label',{class:'check',for:'mal_'+c}, mal, el('div',{},'Está mal: lo corrijo (es ' + ped.real[c] + ')'))));
+    });
+    const b = promesaBoton('Confirmar el eco');
+    pantalla(avisoIncidente(ped), el('section',{class:'card'}, el('h3',{},'El Operativo repite el despacho (eco)'),
+      el('div',{class:'note'}, textoCampos(compilado)), el('p',{class:'small muted'},'Revisa tus datos. Si algo está mal, este es el momento de corregirlo.')), lista, b, feed);
+    await esperar(b);
+    const final = {...compilado};
+    mis.forEach(c => { if(decisiones[c].mal.checked && compilado[c] !== ped.real[c]){ final[c] = ped.real[c]; correcciones.push({campo:c, de:compilado[c], a:ped.real[c], por:'Tú'}); log('Corregiste: ' + CAMPOS[c].label + ' es ' + ped.real[c] + '.'); } });
+    CAMPO_IDS.forEach(c => {
+      if(DUENO[c]!==E.rol && final[c]!==ped.real[c] && rng()<0.8){ correcciones.push({campo:c,de:final[c],a:ped.real[c],por:nombreRol(DUENO[c])}); log(nombreRol(DUENO[c]) + ' corrige: ' + CAMPOS[c].label + ' es ' + ped.real[c] + '.'); final[c]=ped.real[c]; }
+    });
+    enviado = final;
+    await sleep(300);
+  }
+  return { enviado, trace, notas:null, correcciones, notasPasadas:ROLES.length-1 };
+}
+
+/* ====== Resultado de un pedido ====== */
+function puntuar(ped, enviado){
+  const ok = {}; let n = 0;
+  CAMPO_IDS.forEach(c => { ok[c] = enviado[c] === ped.real[c]; if(ok[c]) n++; });
+  return { ok, aciertos:n, puntos: n + (n===CAMPO_IDS.length ? BONUS : 0) };
+}
+function explicarPerdida(c, trace){
+  const t = trace.filter(x => x.campo===c).sort((a,b)=>a.etapa-b.etapa)[0];
+  if(!t) return '';
+  const donde = t.tuyo ? 'en tu nota' : 'en ' + nombreRol(t.etapa);
+  const tipo = {omitido:'se omitió', cambiado:'se cambió', adivinado:'faltó y se adivinó', desactualizado:'quedó desactualizado'}[t.tipo];
+  return ` · ${tipo} ${donde}`;
+}
+async function mostrarResultado(ronda, ped, r, res){
+  const filas = CAMPO_IDS.map(c => el('div',{class:'resrow'},
+    el('div',{}, el('b',{},CAMPOS[c].label), el('div',{class:'small muted'},'Real: ' + ped.real[c])),
+    el('div',{class:'v'}, res.ok[c] ? el('span',{class:'badge ok'},'✔ '+r.enviado[c]) : el('span',{class:'badge bad'},'✘ '+r.enviado[c]), el('div',{class:'small muted'}, res.ok[c] ? '' : explicarPerdida(c, r.trace).replace(/^ · /,'')))));
+  const extra = ronda===2 && r.correcciones.length
+    ? el('div',{class:'card'}, el('h3',{},'El eco corrigió'), ...r.correcciones.map(x => el('p',{class:'small'}, `${CAMPOS[x.campo].label}: ${x.de} → ${x.a} (${x.por})`)))
+    : null;
+  const ultimo = ped.n === PEDIDOS_POR_RONDA;
+  const b = promesaBoton(ultimo ? 'Ver resumen de la ronda' : 'Siguiente pedido');
+  pantalla(el('section',{class:'card'}, el('span',{class:'badge'},`Pedido ${ped.n} de ${PEDIDOS_POR_RONDA}`),
+    el('h2',{}, `${res.puntos} de ${MAXP} puntos`), el('p',{class:'muted'}, res.aciertos===CAMPO_IDS.length ? '¡Despacho perfecto!' : `${res.aciertos} de ${CAMPO_IDS.length} datos correctos.`), ...filas), extra, b);
+  await esperar(b);
+}
+
+/* ====== Resumen y cierre ====== */
+function resumirRonda(res){
+  const errores = res.pedidos.reduce((s,p)=> s + (CAMPO_IDS.length - p.aciertos), 0);
+  return { puntos:res.pedidos.reduce((s,p)=>s+p.puntos,0), max:PEDIDOS_POR_RONDA*MAXP,
+    perfectos:res.pedidos.filter(p=>p.aciertos===CAMPO_IDS.length).length, errores,
+    correcciones:res.pedidos.reduce((s,p)=>s+p.correcciones,0), perdidas:res.pedidos.reduce((s,p)=>s+p.perdidas,0) };
+}
+async function entreRondas(){
+  const s = E.stats[1];
+  const b = promesaBoton('Continuar a la ronda 2');
+  cabecera('Fin de la ronda 1', 50);
+  pantalla(
+    el('section',{class:'card'}, el('span',{class:'badge'},'Ronda 1 terminada'), el('h2',{},`${s.puntos} de ${s.max} puntos`),
+      el('p',{class:'muted'}, `${s.perfectos} despacho(s) perfecto(s) · ${s.errores} dato(s) errado(s) · ${s.perdidas} dato(s) se perdieron, cambiaron o se adivinaron en la cadena.`),
+      el('div',{class:'bar'}, el('i',{style:`width:${s.puntos/s.max*100}%`}))),
+    el('section',{class:'card'}, el('h2',{},'Rediseño: tarjeta de traspaso y eco'),
+      el('p',{},'En la ronda 1 nadie pudo preguntar ni confirmar. Para la ronda 2 el grupo acuerda dos herramientas:'),
+      el('ol',{class:'steps'},
+        el('li',{},[el('b',{},'Tarjeta de traspaso: '),'QUÉ dato · CUÁNDO · QUIÉN · RIESGO · CONFIRMACIÓN.']),
+        el('li',{},[el('b',{},'Regla del eco: '),'quien recibe repite lo que entendió antes de seguir.'])),
+      el('p',{class:'small muted'},'Son propuestas de diseño del equipo; esta demo solo muestra cómo podrían funcionar.')), b);
+  await esperar(b);
+}
+function tarjetaParaLlevar(){
+  return ['TARJETA DE TRASPASO',
+    'QUÉ: (dato exacto, con unidad)', 'CUÁNDO: (hora o plazo)', 'QUIÉN: (quién lo recibe y quién lo envía)',
+    'RIESGO: (qué puede cambiar o falta confirmar)', 'CONFIRMACIÓN: "Entendí que …" (repetir antes de seguir)'].join('\n');
+}
+async function final(){
+  const a = E.stats[1], b = E.stats[2];
+  cabecera('Resultado final', 100);
+  const fila = (n, x, y, fmt) => el('tr',{}, el('td',{},n), el('td',{class:'num'},fmt?fmt(x):x), el('td',{class:'num'},fmt?fmt(y):y));
+  const mejora = b.puntos - a.puntos;
+  const msg = mejora > 0 ? `En la ronda 2 sumaste ${mejora} punto(s) más. Con tarjeta y eco, menos datos se perdieron.`
+    : mejora === 0 ? 'Las dos rondas dieron el mismo puntaje. Revisa en qué pedidos aparecieron los errores.'
+    : 'Esta vez la ronda 2 no mejoró. Con un solo intento el azar pesa mucho: lo importante es ver dónde apareció cada error.';
+  const copiar = promesaBoton('Copiar la tarjeta de traspaso', {ghost:true});
+  const pre = el('pre',{class:'tarjeta'}, tarjetaParaLlevar());
+  copiar.addEventListener('click', async () => { try{ await navigator.clipboard.writeText(tarjetaParaLlevar()); copiar.textContent='Copiada ✔'; }catch{ copiar.textContent='Selecciona y copia el texto'; } });
+  const otra = promesaBoton('Jugar de nuevo con otro rol');
+  const mismo = promesaBoton('Repetir con el mismo rol', {ghost:true});
+  pantalla(
+    el('section',{class:'card'}, el('span',{class:'badge'},'Comparación'), el('h2',{},'Ronda 1 frente a ronda 2'),
+      el('table',{}, el('thead',{}, el('tr',{}, el('th',{},''), el('th',{class:'num'},'Ronda 1'), el('th',{class:'num'},'Ronda 2'))),
+        el('tbody',{},
+          fila('Puntos', a.puntos, b.puntos, v=>v+' / '+a.max),
+          fila('Despachos perfectos', a.perfectos, b.perfectos, v=>v+' / '+PEDIDOS_POR_RONDA),
+          fila('Datos errados', a.errores, b.errores),
+          fila('Datos perdidos en la cadena', a.perdidas, b.perdidas),
+          fila('Correcciones por eco', '—', b.correcciones))),
+      el('div',{style:'margin-top:10px'}, el('div',{class:'small muted'},'Ronda 1'), el('div',{class:'bar'}, el('i',{style:`width:${a.puntos/a.max*100}%`})),
+        el('div',{class:'small muted',style:'margin-top:6px'},'Ronda 2'), el('div',{class:'bar r2'}, el('i',{style:`width:${b.puntos/b.max*100}%`}))),
+      el('p',{style:'margin-top:10px'}, msg),
+      el('p',{class:'small muted'},'Los porcentajes de error de los compañeros simulados son parámetros de la demo, no datos reales. Una sola partida no demuestra nada: sirve para vivir la dinámica.')),
+    el('section',{class:'card'}, el('h2',{},'Qué te llevas'),
+      el('ul',{}, el('li',{},'Un dato que pasa por varias manos se pierde o se deforma si nadie puede confirmarlo.'),
+        el('li',{},'La tarjeta de traspaso ordena qué se dice; el eco comprueba que se entendió.'),
+        el('li',{},'Avisar un cambio a tiempo es parte del trabajo de quien conoce el dato.')),
+      pre, copiar),
+    el('section',{class:'card'}, el('h3',{},'Preguntas para conversar'),
+      el('ul',{}, el('li',{},'¿Dónde se perdió más información?'), el('li',{},'¿Qué cambió cuando hubo tarjeta y eco?'), el('li',{},'¿Qué voy a hacer distinto esta semana?'))),
+    otra, el('div',{style:'height:8px'}), mismo);
+  const r = await Promise.race([esperar(otra).then(()=> 'otra'), esperar(mismo).then(()=> 'mismo')]);
+  return r;
+}
+
+/* ====== Flujo principal ====== */
+async function partida(cambiarRol){
+  rng = mulberry32((semilla += 7919));
+  if(cambiarRol) await intro();
+  E.stats = {};
+  for(const ronda of [1,2]){
+    await briefing(ronda);
+    const resRonda = { pedidos:[] };
+    for(let idx=0; idx<PEDIDOS_POR_RONDA; idx++){
+      const ped = nuevoPedido(idx+1);
+      if(idx===1 || idx===3) aplicarIncidente(ped);
+      const r = ronda===1 ? await turnoR1(ronda, ped, idx) : await turnoR2(ronda, ped, idx);
+      const res = puntuar(ped, r.enviado);
+      await mostrarResultado(ronda, ped, r, res);
+      resRonda.pedidos.push({ puntos:res.puntos, aciertos:res.aciertos, correcciones:r.correcciones.length, perdidas:r.trace.length });
+    }
+    E.stats[ronda] = resumirRonda(resRonda);
+    if(ronda===1) await entreRondas();
+  }
+  return final();
+}
+(async function main(){
+  let cambiar = true;
+  for(;;){
+    const r = await partida(cambiar);
+    cambiar = (r === 'otra');
+  }
+})();
+</script>
+</body>
+</html>
