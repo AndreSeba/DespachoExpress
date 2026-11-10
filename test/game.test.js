@@ -222,3 +222,40 @@ test('formulario: los bots no responden y reiniciar lo borra', () => {
   G.reiniciar(s);
   assert.equal(G.resumenEncuesta(s).respondieron, 0);
 });
+
+test('compuerta: el reloj no corre hasta que todos los humanos tocan Listo', () => {
+  const s = G.crearSala(new Map(), { rondaSeg: 120, pedidos: 3 });
+  const a = G.unirse(s, 'Ana'); const b = G.unirse(s, 'Beto');
+  G.agregarBots(s);
+  const r = G.iniciarRonda(s, { compuerta: true });
+  assert.equal(r.estado, 'preparando');
+  assert.equal(r.fin, null);
+  assert.throws(() => G.enviarMensaje(s, a.id, { como: s.jugadores[a.id].roles[0], datos: {} }));
+  assert.equal(G.marcarListo(s, a.id), false);
+  assert.equal(r.estado, 'preparando');
+  assert.equal(G.marcarListo(s, b.id), true);
+  assert.equal(r.estado, 'activa');
+  assert.ok(r.fin > Date.now() + 100000);
+});
+
+test('compuerta: empezarYa arranca sin esperar y sin humanos arranca de inmediato', () => {
+  const s = G.crearSala(new Map(), { rondaSeg: 60, pedidos: 2 });
+  G.unirse(s, 'Ana'); G.unirse(s, 'Beto');
+  const r = G.iniciarRonda(s, { compuerta: true });
+  assert.equal(r.estado, 'preparando');
+  assert.equal(G.empezarYa(s), true);
+  assert.equal(r.estado, 'activa');
+  const t = G.crearSala(new Map(), { rondaSeg: 60, pedidos: 2 });
+  G.agregarBots(t);
+  assert.equal(G.iniciarRonda(t, { compuerta: true }).estado, 'activa');
+});
+
+test('compuerta: si un humano pendiente se desconecta, la ronda arranca', () => {
+  const s = G.crearSala(new Map(), { rondaSeg: 60, pedidos: 2 });
+  const a = G.unirse(s, 'Ana'); const b = G.unirse(s, 'Beto');
+  const r = G.iniciarRonda(s, { compuerta: true });
+  G.marcarListo(s, a.id);
+  s.jugadores[b.id].conectado = false;
+  assert.equal(G.comprobarListos(s), true);
+  assert.equal(r.estado, 'activa');
+});

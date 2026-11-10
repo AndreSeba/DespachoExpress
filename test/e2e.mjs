@@ -38,6 +38,11 @@ await host.click('text=Completar con bots');
 await host.waitForFunction(() => document.querySelectorAll('#seats .seat').length >= 6);
 await host.screenshot({ path: `${OUT}/panel-01-lobby.png` });
 await host.click('[data-accion="iniciar"]');
+await jug.waitForSelector('#entendidoBtn');
+await host.waitForSelector('#preparando');
+await jug.screenshot({ path: `${OUT}/jugador-00-briefing.png`, fullPage: true });
+await host.screenshot({ path: `${OUT}/panel-01b-esperando-listo.png` });
+await jug.click('#entendidoBtn');
 await host.waitForSelector('#ringTx');
 const rolJugador = await jug.locator('#tRol').textContent();
 console.log('rol de Camila:', rolJugador);
@@ -48,7 +53,6 @@ async function jugarHumano(modo) {
   const hasta = Date.now() + 70000; let acciones = 0;
   while (Date.now() < hasta) {
     const fase = await jug.locator('main').innerText();
-    if (await jug.locator('#entendidoBtn').count()) { await jug.click('#entendidoBtn'); continue; }
     if (/Ronda terminada|Fin del juego/.test(fase)) break;
     const sel = jug.locator('select[data-campo]');
     const n = await sel.count();
@@ -65,8 +69,6 @@ async function jugarHumano(modo) {
   return acciones;
 }
 let sacoCaptura = false;
-await jug.waitForSelector('#entendidoBtn');
-await jug.screenshot({ path: `${OUT}/jugador-00-briefing.png`, fullPage: true });
 const jugando = jugarHumano(1);
 // Captura en mitad de la ronda con paquetes en movimiento
 await espera(9000);
@@ -81,6 +83,9 @@ await host.screenshot({ path: `${OUT}/panel-04-entre-rondas.png` });
 
 // ---- Ronda 2
 await host.click('[data-accion="iniciar"]');
+await jug.waitForSelector('#entendidoBtn');
+await host.waitForSelector('#preparando');
+await jug.click('#entendidoBtn');
 await host.waitForSelector('#ringTx');
 const j2 = jugarHumano(2);
 await espera(12000);

@@ -7,7 +7,7 @@
   let sesion = null;
   try { sesion = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch { sesion = null; }
   const params = new URLSearchParams(location.search);
-  let briefVisto = 0, S = null, offset = 0, rolSel = null, claveAccion = '', accionNodo = null, enviadoLocal = {};
+  let S = null, offset = 0, rolSel = null, claveAccion = '', accionNodo = null, enviadoLocal = {};
   const dirtySel = {};
 
   const net = DX.conectar({
@@ -72,7 +72,7 @@
     const r = S.ronda;
     document.getElementById('tPed').textContent = r && r.estado === 'activa' ? `R${r.numero} · Pedido ${r.pedidoActual}/${r.pedidosTotal}` : '';
     if (S.fase === 'lobby') return pantallaLobby();
-    if (r && r.estado === 'activa' && rol && !S.yo.observador && briefVisto !== r.numero) return pantallaBriefing(r, rol);
+    if (r && r.estado === 'preparando') return rol && !S.yo.observador ? pantallaBriefing(r, rol) : pantallaEspera(r);
     if (r && r.estado === 'activa') return pantallaJuego(r, rol);
     return pantallaResultado();
   }
@@ -157,10 +157,21 @@
     return el('div', { class: 'cadena-m', 'aria-label': 'Cadena de despacho' }, nodos);
   }
 
+  function pantallaEspera(r) {
+    claveAccion = ''; accionNodo = null; document.getElementById('tTm').textContent = '';
+    $app.replaceChildren(el('div', { class: 'card bg-brand border-0 mb-3' }, el('div', { class: 'card-body' },
+      el('h2', { class: 'h4' }, ic('bi-eye', 'me-2'), `Ronda ${r.numero} por empezar`), el('p', { class: 'mb-0 opacity-75' }, 'Esperando al equipo.'))));
+  }
+
   function pantallaBriefing(r, rol) {
     claveAccion = ''; accionNodo = null;
     const misRoles = rolesYo();
-    const b = el('button', { type: 'button', class: 'btn btn-primary btn-lg w-100', id: 'entendidoBtn', onclick: () => { briefVisto = r.numero; render(); } }, ic('bi-play-fill', 'me-2'), 'Listo');
+    const pr = r.preparacion || { listos: [], requeridos: [] };
+    const yaListo = pr.listos.includes(S.yo.id);
+    const nListos = pr.listos.filter((id) => pr.requeridos.includes(id)).length;
+    const b = yaListo
+      ? el('div', { class: 'alert alert-success text-center mb-0', id: 'esperandoListos' }, ic('bi-hourglass-split', 'me-2'), `Esperando al equipo: ${nListos} de ${pr.requeridos.length}`)
+      : el('button', { type: 'button', class: 'btn btn-primary btn-lg w-100', id: 'entendidoBtn', onclick: () => net.enviar({ t: 'listo' }) }, ic('bi-play-fill', 'me-2'), 'Listo');
     $app.replaceChildren(
       el('div', { class: 'card bg-brand border-0 mb-3 text-center' }, el('div', { class: 'card-body py-4' },
         el('div', { class: 'small text-uppercase opacity-75' }, 'Te tocó'),

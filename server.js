@@ -158,7 +158,8 @@ wss.on('connection', (ws) => {
       if (ctx.tipo === 'host') {
         switch (m.t) {
           case 'config': G.configurar(sala, m); break;
-          case 'iniciar': G.iniciarRonda(sala); programarCierre(sala); break;
+          case 'iniciar': G.iniciarRonda(sala, { compuerta: true }); programarCierre(sala); break;
+          case 'empezar': G.empezarYa(sala); programarCierre(sala); break;
           case 'bots': G.agregarBots(sala); break;
           case 'quitarbots': G.quitarBots(sala); break;
           case 'incidente': G.lanzarIncidente(sala); break;
@@ -171,6 +172,7 @@ wss.on('connection', (ws) => {
           case 'msg': G.enviarMensaje(sala, ctx.jugadorId, m); break;
           case 'pedido': G.enviarPedido(sala, ctx.jugadorId, m.valores); break;
           case 'encuesta': G.enviarEncuesta(sala, ctx.jugadorId, m); break;
+          case 'listo': G.marcarListo(sala, ctx.jugadorId); programarCierre(sala); break;
           default: return;
         }
         if (sala.actual && sala.actual.estado === 'cerrada') clearTimeout(timers.get(sala.code));
@@ -188,6 +190,7 @@ wss.on('connection', (ws) => {
     clientes.delete(ws);
     if (ctx && ctx.tipo === 'jugador') {
       actualizarConexion(ctx.sala, ctx.jugadorId);
+      if (G.comprobarListos(ctx.sala)) { programarCierre(ctx.sala); tickBots(ctx.sala); }
       difundir(ctx.sala);
     }
   });

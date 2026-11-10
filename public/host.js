@@ -112,6 +112,9 @@
         boton('bi-robot', 'Completar con bots', 'btn-outline-secondary', () => enviar('bots'), { 'data-accion': 'bots' }),
         boton('bi-trash3', 'Quitar bots', 'btn-outline-secondary', () => enviar('quitarbots')));
       if (S.restriccionRelajada) c.append(el('div', { class: 'alert alert-warning small mb-0' }, 'Los puestos declarados no permitieron evitar todos los cruces.'));
+    } else if (S.fase === 'ronda' && S.ronda && S.ronda.estado === 'preparando') {
+      c.append(boton('bi-skip-forward-fill', 'Empezar ya', 'btn-primary btn-lg', () => enviar('empezar'), { 'data-accion': 'empezar' }),
+        boton('bi-stop-fill', 'Cancelar', 'btn-outline-secondary', () => enviar('reiniciar')));
     } else if (S.fase === 'ronda') {
       c.append(boton('bi-lightning-charge-fill', 'Incidente', 'btn-primary btn-lg', () => enviar('incidente'), { 'data-accion': 'incidente' }),
         boton('bi-stop-fill', 'Cerrar ronda', 'btn-danger', () => enviar('cerrar'), { 'data-accion': 'cerrar' }),
@@ -141,6 +144,14 @@
     if (!r) {
       f.append(el('div', {}, el('h2', { class: 'h5 mb-1' }, ic('bi-hourglass-split', 'me-2'), 'Esperando jugadores'),
         el('span', { class: 'badge text-bg-secondary' }, ic('bi-people', 'me-1'), S.jugadores.length), el('span', { class: 'text-body-secondary small ms-2' }, 'Comparte el código con el equipo')));
+      return;
+    }
+    if (r.estado === 'preparando') {
+      const pr = r.preparacion || { listos: [], requeridos: [] };
+      f.append(el('div', { class: 'd-flex flex-wrap align-items-center gap-3', id: 'preparando' },
+        el('h2', { class: 'h5 mb-0' }, ic('bi-hourglass-split', 'me-2'), `Ronda ${r.numero}: esperando "Listo"`),
+        el('span', { class: 'badge text-bg-primary fs-6', id: 'listosConteo' }, `${pr.listos.filter((id) => pr.requeridos.includes(id)).length} de ${pr.requeridos.length}`),
+        el('div', {}, S.jugadores.filter((j) => pr.requeridos.includes(j.id)).map((j) => el('span', { class: 'dato' + (pr.listos.includes(j.id) ? ' ok' : '') }, ic(pr.listos.includes(j.id) ? 'bi-check-circle-fill' : 'bi-hourglass'), j.alias)))));
       return;
     }
     const det = detalleRonda(r.numero); const peds = det ? det.pedidos : [];
