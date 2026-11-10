@@ -242,7 +242,7 @@ async function briefing(ronda){
   const b = promesaBoton(ronda===1 ? 'Empezar ronda 1' : 'Empezar ronda 2');
   pantalla(el('section',{class:'card'}, el('span',{class:'badge'},'Ronda '+ronda+' de 2'),
     el('h2',{}, ronda===1 ? 'Solo hacia adelante' : 'Conversar y confirmar'),
-    el('p',{class:'muted'}, 'Cadena: ' + ROLES.map(r=>r.nombre).join(' → ')),
+    el('p',{class:'muted'}, 'Cadena: ' + ROLES.map(r=>r.nombre).join(' > ')),
     el('ol',{class:'steps'}, ...reglas),
     el('p',{class:'small'},'Tu rol: ', el('b',{},nombreRol(E.rol)), '.')), b);
   await esperar(b);
@@ -438,9 +438,9 @@ function explicarPerdida(c, trace){
 async function mostrarResultado(ronda, ped, r, res){
   const filas = CAMPO_IDS.map(c => el('div',{class:'resrow'},
     el('div',{}, el('b',{},CAMPOS[c].label), el('div',{class:'small muted'},'Real: ' + ped.real[c])),
-    el('div',{class:'v'}, res.ok[c] ? el('span',{class:'badge ok'},'✔ '+r.enviado[c]) : el('span',{class:'badge bad'},'✘ '+r.enviado[c]), el('div',{class:'small muted'}, res.ok[c] ? '' : explicarPerdida(c, r.trace).replace(/^ · /,'')))));
+    el('div',{class:'v'}, res.ok[c] ? el('span',{class:'badge ok'},'Correcto: '+r.enviado[c]) : el('span',{class:'badge bad'},'Incorrecto: '+r.enviado[c]), el('div',{class:'small muted'}, res.ok[c] ? '' : explicarPerdida(c, r.trace).replace(/^ · /,'')))));
   const extra = ronda===2 && r.correcciones.length
-    ? el('div',{class:'card'}, el('h3',{},'El eco corrigió'), ...r.correcciones.map(x => el('p',{class:'small'}, `${CAMPOS[x.campo].label}: ${x.de} → ${x.a} (${x.por})`)))
+    ? el('div',{class:'card'}, el('h3',{},'El eco corrigió'), ...r.correcciones.map(x => el('p',{class:'small'}, `${CAMPOS[x.campo].label}: ${x.de} > ${x.a} (${x.por})`)))
     : null;
   const ultimo = ped.n === PEDIDOS_POR_RONDA;
   const b = promesaBoton(ultimo ? 'Ver resumen de la ronda' : 'Siguiente pedido');
@@ -487,7 +487,7 @@ async function final(){
     : 'Esta vez la ronda 2 no mejoró. Con un solo intento el azar pesa mucho: lo importante es ver dónde apareció cada error.';
   const copiar = promesaBoton('Copiar la tarjeta de traspaso', {ghost:true});
   const pre = el('pre',{class:'tarjeta'}, tarjetaParaLlevar());
-  copiar.addEventListener('click', async () => { try{ await navigator.clipboard.writeText(tarjetaParaLlevar()); copiar.textContent='Copiada ✔'; }catch{ copiar.textContent='Selecciona y copia el texto'; } });
+  copiar.addEventListener('click', async () => { try{ await navigator.clipboard.writeText(tarjetaParaLlevar()); copiar.textContent='Copiada'; }catch{ copiar.textContent='Selecciona y copia el texto'; } });
   const otra = promesaBoton('Jugar de nuevo con otro rol');
   const mismo = promesaBoton('Repetir con el mismo rol', {ghost:true});
   pantalla(
