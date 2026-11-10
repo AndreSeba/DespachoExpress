@@ -48,6 +48,7 @@ async function jugarHumano(modo) {
   const hasta = Date.now() + 70000; let acciones = 0;
   while (Date.now() < hasta) {
     const fase = await jug.locator('main').innerText();
+    if (await jug.locator('#entendidoBtn').count()) { await jug.click('#entendidoBtn'); continue; }
     if (/Ronda terminada|Fin del juego/.test(fase)) break;
     const sel = jug.locator('select[data-campo]');
     const n = await sel.count();
@@ -64,6 +65,8 @@ async function jugarHumano(modo) {
   return acciones;
 }
 let sacoCaptura = false;
+await jug.waitForSelector('#entendidoBtn');
+await jug.screenshot({ path: `${OUT}/jugador-00-briefing.png`, fullPage: true });
 const jugando = jugarHumano(1);
 // Captura en mitad de la ronda con paquetes en movimiento
 await espera(9000);

@@ -71,3 +71,16 @@ table.heat td{padding:0;text-align:center}
 .ev .t{color:var(--bs-secondary-color);font-size:.78rem;min-width:40px}
 .metric .bars{flex:1}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+
+/* ===== Cadena y briefing del jugador ===== */
+.cadena-m{display:flex;align-items:center;justify-content:center;gap:2px;margin:0 0 .9rem}
+.cadena-m .eslabon{position:relative;width:42px;height:42px;border-radius:50%;border:3px solid var(--bs-border-color);display:flex;align-items:center;justify-content:center;font-size:1.15rem;background:var(--bs-body-bg);color:var(--bs-secondary-color);transition:all .25s}
+.cadena-m .eslabon.yo{border-color:var(--brand-orange);color:var(--brand-orange);transform:scale(1.18);box-shadow:0 0 0 4px rgba(224,122,47,.2)}
+.cadena-m .eslabon.listo{border-color:#198754;color:#198754}
+.cadena-m .tic{position:absolute;right:-5px;top:-6px;font-size:.85rem;background:var(--bs-body-bg);border-radius:50%;line-height:1}
+.cadena-m .flecha-m{font-size:.7rem}
+.paso-m{border:1px solid var(--bs-border-color);border-radius:12px;padding:.7rem .3rem;background:var(--bs-body-bg);height:100%;color:var(--brand-navy)}
+[data-bs-theme="dark"] .paso-m{color:#cfe0f5}
+.rol-pop{animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+@media (prefers-reduced-motion:reduce){.rol-pop{animation:none}}
