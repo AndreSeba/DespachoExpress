@@ -103,7 +103,7 @@ footer{max-width:640px;margin:0 auto;padding:0 16px 24px;color:var(--muted);font
 const ROLES = [
   { id:'planificacion', nombre:'Planificación de despachos', campos:['destino','horario'], desc:'Primer eslabón. Consolidas los requerimientos: sabes el destino y la hora de salida.' },
   { id:'inventarios', nombre:'Inventarios', campos:['producto','cantidad'], desc:'Sabes qué producto y qué cantidad hay.' },
-  { id:'almacen', nombre:'Almacén', campos:['anden'], desc:'Sabes en qué andén se carga.' },
+  { id:'almacen', nombre:'Almacén', campos:['anden'], desc:'Sabes en qué muelle se carga.' },
   { id:'transporte', nombre:'Transporte', campos:['unidad'], desc:'Sabes qué unidad lleva el pedido.' },
   { id:'seguridad', nombre:'Seguridad', campos:['restriccion'], desc:'Conoces la restricción de la carga.' },
   { id:'operativo', nombre:'Operativo', campos:[], desc:'Último eslabón. Armas y envías el despacho completo.' },
@@ -111,7 +111,7 @@ const ROLES = [
 const CAMPOS = {
   producto:{label:'Producto',op:['Café soluble','Galletas','Leche en polvo','Cereal','Chocolate en barra','Bebida láctea']},
   cantidad:{label:'Cantidad (cajas)',op:['40','60','80','120','200']},
-  anden:{label:'Andén',op:['A1','A2','A3','A4']},
+  anden:{label:'Muelle',op:['Muelle 1','Muelle 2','Muelle 3','Muelle 4']},
   unidad:{label:'Unidad',op:['Camión 1','Camión 2','Camión 3','Camión 4']},
   restriccion:{label:'Restricción',op:['Sin restricción','No apilar','Mantener fresco','Requiere precinto']},
   destino:{label:'Destino',op:['Supermercado Norte','Tienda Equipetrol','Distribuidor Plan 3000','Cliente Cochabamba','Cliente La Paz']},
@@ -121,7 +121,7 @@ const CAMPO_IDS = Object.keys(CAMPOS);
 const DUENO = {}; ROLES.forEach((r,i)=>r.campos.forEach(c=>DUENO[c]=i));
 const INCIDENTE_TXT = {
   unidad:'Paro de transporte: cambia la unidad asignada.', horario:'El cliente cambia la hora de salida.',
-  anden:'Mantenimiento: cambia el andén de carga.', restriccion:'Inspección: cambia la restricción de la carga.',
+  anden:'Mantenimiento: cambia el muelle de carga.', restriccion:'Inspección: cambia la restricción de la carga.',
   destino:'El cliente cambia el punto de entrega.', cantidad:'Se corrige la cantidad del pedido.',
 };
 const PEDIDOS_POR_RONDA = 4, BONUS = 3, MAXP = CAMPO_IDS.length + BONUS;

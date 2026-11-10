@@ -75,11 +75,11 @@ test('ronda 2 con eco: tipos de mensaje y valoresComunicados', () => {
   const hs = ['A', 'B', 'C', 'D', 'E', 'F'].map((a) => G.unirse(s, a));
   G.iniciarRonda(s); G.cerrarRonda(s, 'manual'); G.iniciarRonda(s);
   const d = (rol) => hs.find((p) => p.roles.includes(rol));
-  G.enviarMensaje(s, d('almacen').id, { tipo: 'tarjeta', a: 'todos', datos: { anden: 'A1' } });
-  G.enviarMensaje(s, d('operativo').id, { tipo: 'eco', datos: { anden: 'A1' } });
-  G.enviarMensaje(s, d('almacen').id, { tipo: 'correccion', a: 'todos', datos: { anden: 'A3' } });
-  assert.throws(() => G.enviarMensaje(s, d('almacen').id, { tipo: 'eco', datos: { anden: 'A1' } }), /Operativo/);
-  assert.equal(G.valoresComunicados(s.actual, 1).anden, 'A3');
+  G.enviarMensaje(s, d('almacen').id, { tipo: 'tarjeta', a: 'todos', datos: { anden: 'Muelle 1' } });
+  G.enviarMensaje(s, d('operativo').id, { tipo: 'eco', datos: { anden: 'Muelle 1' } });
+  G.enviarMensaje(s, d('almacen').id, { tipo: 'correccion', a: 'todos', datos: { anden: 'Muelle 3' } });
+  assert.throws(() => G.enviarMensaje(s, d('almacen').id, { tipo: 'eco', datos: { anden: 'Muelle 1' } }), /Operativo/);
+  assert.equal(G.valoresComunicados(s.actual, 1).anden, 'Muelle 3');
   assert.equal(G.resumenRonda(s.actual).ecos, 1);
   assert.equal(G.resumenRonda(s.actual).correcciones, 1);
 });
