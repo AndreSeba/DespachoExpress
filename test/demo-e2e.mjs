@@ -44,7 +44,7 @@ async function jugar(browser, rolId, seed, shots) {
 }
 
 const browser = await chromium.launch();
-const roles = ['atencion', 'planificacion', 'almacen', 'transporte', 'seguridad', 'operativo'];
+const roles = ['planificacion', 'inventarios', 'almacen', 'transporte', 'seguridad', 'operativo'];
 let ok = true;
 for (const [i, r] of roles.entries()) {
   const res = await jugar(browser, r, 100 + i, r === 'transporte' || r === 'operativo');

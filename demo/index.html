@@ -101,8 +101,8 @@ footer{max-width:640px;margin:0 auto;padding:0 16px 24px;color:var(--muted);font
 'use strict';
 /* ====== Datos del juego ====== */
 const ROLES = [
-  { id:'atencion', nombre:'Atención al cliente', campos:['destino','horario'], desc:'Primer eslabón. Conoces el destino y la hora de salida.' },
-  { id:'planificacion', nombre:'Planificación', campos:['producto','cantidad'], desc:'Defines producto y cantidad.' },
+  { id:'planificacion', nombre:'Planificación de despachos', campos:['destino','horario'], desc:'Primer eslabón. Consolidas los requerimientos: sabes el destino y la hora de salida.' },
+  { id:'inventarios', nombre:'Inventarios', campos:['producto','cantidad'], desc:'Sabes qué producto y qué cantidad hay.' },
   { id:'almacen', nombre:'Almacén', campos:['anden'], desc:'Sabes en qué andén se carga.' },
   { id:'transporte', nombre:'Transporte', campos:['unidad'], desc:'Sabes qué unidad lleva el pedido.' },
   { id:'seguridad', nombre:'Seguridad', campos:['restriccion'], desc:'Conoces la restricción de la carga.' },

@@ -1,13 +1,13 @@
 # Despacho Express
 
 Juego cooperativo para practicar la comunicación **entre compañeros** en una cadena de despacho
-(📞 atención → 🗓️ planificación → 📦 almacén → 🚚 transporte → 🦺 seguridad → 📋 operativo).
+(Planificación de despachos → Inventarios → Almacén → Transporte → Seguridad → Operativo).
 
 ## Definición
 - **Problema que ataca:** la comunicación entre compañeros no es fluida (hallazgo preliminar del equipo).
 - **Duración:** 30 minutos, 2 rondas.
-  1. **Ronda 1, solo hacia adelante:** notas en una sola dirección, sin poder preguntar.
-  2. **Ronda 2, conversar y confirmar:** tarjeta de traspaso (qué, cuándo, quién, riesgo, confirmación) y *eco* (repetir lo entendido).
+ 1. **Ronda 1, solo hacia adelante:** notas en una sola dirección, sin poder preguntar.
+ 2. **Ronda 2, conversar y confirmar:** tarjeta de traspaso (qué, cuándo, quién, riesgo, confirmación) y *eco* (repetir lo entendido).
 - **Qué se llevan:** la tarjeta de traspaso, la regla del eco y un compromiso personal.
 - **Qué mide:** puntos, datos errados, mensajes y correcciones por eco, ronda contra ronda.
 - **Límites:** simulación con pocas personas y sin grupo de comparación. La tarjeta y el eco son propuestas de diseño del equipo; los casos son ficticios.
@@ -17,18 +17,18 @@ Juego cooperativo para practicar la comunicación **entre compañeros** en una c
 |---|---|---|
 | **Demo en HTML** | Un solo archivo; juegas solo con compañeros simulados. | Abre `demo/index.html` en el navegador o súbelo a un hosting estático. |
 | **Sistema multijugador** | Cada participante en su celular y la facilitadora en el panel. | `npm install` y `npm start`; luego abre `/host`. |
-| **Multijugador con bots** | Para probar el panel sin 6 personas. | En el panel, botón 🤖 *Completar con bots*. |
+| **Multijugador con bots** | Para probar el panel sin 6 personas. | En el panel, botón *Completar con bots*. |
 
 ## Panel de la facilitadora (`/host`)
 Pensado para mirar y tocar, con poco texto:
 - **Código de sala** grande; al tocarlo se copia el enlace para los jugadores.
 - **Equipo:** 6 tarjetas de rol con el apodo, si es persona o bot, y si está conectado. Tocar un rol abre su historial.
-- **Recorrido en vivo:** la cadena de 6 eslabones con paquetes que viajan cuando alguien envía una nota (✉️), tarjeta (🪪), eco (🔊) o corrección (✏️). Cada eslabón muestra su dato en verde (correcto), amarillo (desactualizado) o rojo (errado). Los incidentes ⚡ destellan en el dueño del dato.
-- **Reloj, ronda y pedidos:** anillo de tiempo, puntos y un círculo por pedido (✓ perfecto, naranja con errores, pulsando el actual). Tocar un círculo inspecciona ese pedido.
-- **Recorrido de cada dato:** cuadrícula de 7 datos por 6 eslabones y el envío final; ✓ / ✗ / ↺ para ver dónde se perdió o cambió cada dato.
+- **Recorrido en vivo:** la cadena de 6 eslabones con paquetes que viajan cuando alguien envía una nota (), tarjeta (), eco () o corrección (). Cada eslabón muestra su dato en verde (correcto), amarillo (desactualizado) o rojo (errado). Los incidentes destellan en el dueño del dato.
+- **Reloj, ronda y pedidos:** anillo de tiempo, puntos y un círculo por pedido (verde si es perfecto, naranja si tiene errores, pulsando el actual). Tocar un círculo inspecciona ese pedido.
+- **Recorrido de cada dato:** cuadrícula de 7 datos por 6 eslabones y el envío final; / / ↺ para ver dónde se perdió o cambió cada dato.
 - **Actividad:** línea de tiempo con iconos.
 - **Comparar:** ronda 1 frente a ronda 2 con barras, mapas de aciertos por pedido y el campo más errado.
-- **Controles:** ▶ iniciar ronda, ⚡ incidente (o automático), ⏹ cerrar, ↺ nueva partida, ⬇ CSV, y ajustes de duración y número de pedidos.
+- **Controles:** ▶ iniciar ronda, incidente (o automático), ⏹ cerrar, ↺ nueva partida, ⬇ CSV, y ajustes de duración y número de pedidos.
 
 ## Cómo se juega (jugadores, desde el celular)
 1. Abren el enlace o escriben el código de 4 letras y un apodo (no el nombre real).

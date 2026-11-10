@@ -2,14 +2,14 @@
   'use strict';
   const DX = (window.DX = {});
   // Íconos de Bootstrap Icons (sin emojis)
-  DX.ICON_ROL = { atencion: 'bi-headset', planificacion: 'bi-calendar-check', almacen: 'bi-box-seam', transporte: 'bi-truck', seguridad: 'bi-shield-check', operativo: 'bi-clipboard-check' };
+  DX.ICON_ROL = { planificacion: 'bi-calendar-check', inventarios: 'bi-boxes', almacen: 'bi-box-seam', transporte: 'bi-truck', seguridad: 'bi-shield-check', operativo: 'bi-clipboard-check' };
   DX.ICON_CAMPO = { producto: 'bi-bag', cantidad: 'bi-123', anden: 'bi-building', unidad: 'bi-truck-front', restriccion: 'bi-exclamation-triangle', destino: 'bi-geo-alt', horario: 'bi-clock' };
   DX.ICON_TIPO = { nota: 'bi-envelope', tarjeta: 'bi-person-vcard', eco: 'bi-megaphone', correccion: 'bi-pencil', msg: 'bi-chat-dots' };
   DX.COLOR_TIPO = { nota: '#2B6CB0', tarjeta: '#0E9AA7', eco: '#7C4DBA', correccion: '#E07A2F', msg: '#6B7B8C' };
-  DX.NOMBRE_ROL = { atencion: 'Atención al cliente', planificacion: 'Planificación', almacen: 'Almacén', transporte: 'Transporte', seguridad: 'Seguridad', operativo: 'Operativo' };
-  DX.ORDEN = ['atencion', 'planificacion', 'almacen', 'transporte', 'seguridad', 'operativo'];
+  DX.NOMBRE_ROL = { planificacion: 'Planificación de despachos', inventarios: 'Inventarios', almacen: 'Almacén', transporte: 'Transporte', seguridad: 'Seguridad', operativo: 'Operativo' };
+  DX.ORDEN = ['planificacion', 'inventarios', 'almacen', 'transporte', 'seguridad', 'operativo'];
   DX.CAMPOS_ORDEN = ['producto', 'cantidad', 'anden', 'unidad', 'restriccion', 'destino', 'horario'];
-  DX.CAMPOS_DE = { atencion: ['destino', 'horario'], planificacion: ['producto', 'cantidad'], almacen: ['anden'], transporte: ['unidad'], seguridad: ['restriccion'], operativo: [] };
+  DX.CAMPOS_DE = { planificacion: ['destino', 'horario'], inventarios: ['producto', 'cantidad'], almacen: ['anden'], transporte: ['unidad'], seguridad: ['restriccion'], operativo: [] };
 
   // Tema claro/oscuro según el dispositivo
   const mq = window.matchMedia('(prefers-color-scheme: dark)');

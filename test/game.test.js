@@ -38,8 +38,8 @@ test('ronda 1: las notas solo van al siguiente eslabón y validan los datos', ()
   const humanos = ['A', 'B', 'C', 'D', 'E', 'F'].map((a) => G.unirse(s, a));
   G.iniciarRonda(s);
   const dueno = (rol) => humanos.find((p) => p.roles.includes(rol));
-  const m = G.enviarMensaje(s, dueno('atencion').id, { datos: { destino: G.CAMPOS.destino.opciones[0] } });
-  assert.equal(m.a, 'planificacion');
+  const m = G.enviarMensaje(s, dueno('planificacion').id, { datos: { destino: G.CAMPOS.destino.opciones[0] } });
+  assert.equal(m.a, 'inventarios');
   assert.equal(m.tipo, 'nota');
   assert.throws(() => G.enviarMensaje(s, dueno('operativo').id, { texto: 'hola' }), /último eslabón/);
   assert.throws(() => G.enviarMensaje(s, dueno('almacen').id, { datos: { anden: 'Z9' } }), /inválido/);
@@ -113,7 +113,7 @@ test('el snapshot del jugador solo muestra sus datos', () => {
 });
 
 test('roles aleatorios: nadie recibe el eslabón de su puesto real (1000 sorteos)', () => {
-  const puestos = ['operativo', 'operativo', 'operativo', 'almacen', 'planificacion', 'atencion'];
+  const puestos = ['operativo', 'operativo', 'operativo', 'almacen', 'inventarios', 'planificacion'];
   for (let n = 0; n < 1000; n++) {
     const s = G.crearSala(new Map());
     const js = puestos.map((pu, i) => G.unirse(s, 'J' + i, null, { puesto: pu }));
