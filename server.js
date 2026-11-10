@@ -22,7 +22,7 @@ const timers = new Map(); // code -> timeout
 
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
-  '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.json': 'application/json; charset=utf-8',
+  '.svg': 'image/svg+xml', '.woff2': 'font/woff2', '.woff': 'font/woff', '.png': 'image/png', '.ico': 'image/x-icon', '.json': 'application/json; charset=utf-8',
   '.webmanifest': 'application/manifest+json',
 };
 
@@ -31,7 +31,7 @@ function cabecerasBase(extra = {}) {
     'X-Content-Type-Options': 'nosniff',
     'Referrer-Policy': 'no-referrer',
     'X-Frame-Options': 'DENY',
-    'Content-Security-Policy': "default-src 'self'; connect-src 'self' ws: wss:; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; frame-ancestors 'none'",
+    'Content-Security-Policy': "default-src 'self'; connect-src 'self' ws: wss:; img-src 'self' data:; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; frame-ancestors 'none'",
     ...extra,
   };
 }
@@ -144,7 +144,7 @@ wss.on('connection', (ws) => {
         case 'unirse': {
           const sala = salas.get(String(m.code || '').toUpperCase().trim());
           if (!sala) throw Object.assign(new Error('No encontramos esa sala. Revisa el código.'), { publico: true, codigo: 'sala' });
-          const p = G.unirse(sala, m.alias, m.token);
+          const p = G.unirse(sala, m.alias, m.token, { puesto: m.puesto });
           clientes.set(ws, { sala, tipo: 'jugador', jugadorId: p.id });
           enviar(ws, { t: 'unido', code: sala.code, token: p.token, jugadorId: p.id });
           return difundir(sala);

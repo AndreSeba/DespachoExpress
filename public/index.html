@@ -1,19 +1,24 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-bs-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1F3A5F">
 <title>Despacho Express</title>
+<link rel="stylesheet" href="/vendor/bootstrap.min.css">
+<link rel="stylesheet" href="/vendor/bootstrap-icons.min.css">
 <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-<div class="p-top" id="top" hidden>
-  <div class="rol" id="tRol"></div>
-  <div id="tPed" class="small"></div>
-  <div class="tm" id="tTm"></div>
-</div>
-<main class="p-main" id="app" aria-live="polite"></main>
+<nav class="navbar bg-brand p-nav px-3 py-2" id="top" hidden>
+  <div class="d-flex w-100 align-items-center justify-content-between gap-2 text-white">
+    <div class="fw-bold" id="tRol"></div>
+    <div class="small" id="tPed"></div>
+    <div class="fw-bold fs-5 tabular" id="tTm"></div>
+  </div>
+</nav>
+<main class="container p-main py-3" id="app" aria-live="polite"></main>
+<script src="/vendor/bootstrap.bundle.min.js"></script>
 <script src="/common.js"></script>
 <script src="/player.js"></script>
 </body>

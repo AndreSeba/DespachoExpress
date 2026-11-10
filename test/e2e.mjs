@@ -28,8 +28,9 @@ console.log('sala', code);
 const pctx = await browser.newContext({ ...devices['iPhone 13'] });
 const jug = await pctx.newPage(); vigila(jug, 'jugador');
 await jug.goto(`${base}/?c=${code}`);
-await jug.fill('input[aria-label="Tu apodo"]', 'Camila');
-await jug.click('text=Entrar');
+await jug.fill('#nombreIn', 'Camila');
+await jug.selectOption('#puestoIn', 'operativo');
+await jug.click('#entrarBtn');
 await jug.waitForSelector('text=Esperando a que empiece');
 
 // ---- Facilitadora completa con bots e inicia
@@ -40,6 +41,7 @@ await host.click('[data-accion="iniciar"]');
 await host.waitForSelector('#ringTx');
 const rolJugador = await jug.locator('#tRol').textContent();
 console.log('rol de Camila:', rolJugador);
+if (/Operativo/.test(rolJugador)) { errores.push('Camila declaró Operativo y recibió Operativo'); }
 
 // ---- Camila juega como humano según su rol (ronda 1: pasa nota; operativo: arma despacho)
 async function jugarHumano(modo) {
@@ -54,7 +56,7 @@ async function jugarHumano(modo) {
     const tarjeta = jug.locator('button:has-text("Publicar mi tarjeta")');
     const despacho = jug.locator('button:has-text("Enviar despacho")');
     const eco = jug.locator('button:has-text("Leer el eco")');
-    if (await enviarNota.count() && (await jug.locator('.check').count())) { await enviarNota.first().click(); acciones++; }
+    if (await enviarNota.count() && (await jug.locator('input[type=checkbox]').count())) { await enviarNota.first().click(); acciones++; }
     else if (await tarjeta.count()) { await tarjeta.first().click(); acciones++; await espera(500); }
     else if (await despacho.count()) { if (modo === 2 && await eco.count()) { await eco.first().click(); await espera(300); } await despacho.first().click(); acciones++; }
     await espera(1200);

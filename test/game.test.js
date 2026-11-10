@@ -111,3 +111,61 @@ test('el snapshot del jugador solo muestra sus datos', () => {
   const host = G.snapshot(s, { tipo: 'host' });
   assert.ok(host.detalle[0].pedidos[0].real);
 });
+
+test('roles aleatorios: nadie recibe el eslabón de su puesto real (1000 sorteos)', () => {
+  const puestos = ['operativo', 'operativo', 'operativo', 'almacen', 'planificacion', 'atencion'];
+  for (let n = 0; n < 1000; n++) {
+    const s = G.crearSala(new Map());
+    const js = puestos.map((pu, i) => G.unirse(s, 'J' + i, null, { puesto: pu }));
+    G.iniciarRonda(s);
+    assert.equal(s.restriccionRelajada, false);
+    for (const p of js) {
+      assert.equal(p.roles.length, 1);
+      assert.notEqual(p.roles[0], p.puesto);
+    }
+    assert.deepEqual(js.flatMap((p) => p.roles).sort(), G.ROLE_IDS.slice().sort());
+  }
+});
+
+test('roles aleatorios: varían entre partidas', () => {
+  const vistos = new Set();
+  for (let n = 0; n < 60; n++) {
+    const s = G.crearSala(new Map());
+    const js = ['A', 'B', 'C', 'D', 'E', 'F'].map((a) => G.unirse(s, a));
+    G.iniciarRonda(s);
+    vistos.add(js.map((p) => p.roles[0]).join(','));
+  }
+  assert.ok(vistos.size > 20);
+});
+
+test('con pocos jugadores nadie se queda sin rol y se respeta el puesto', () => {
+  for (let n = 0; n < 300; n++) {
+    const s = G.crearSala(new Map());
+    const a = G.unirse(s, 'A', null, { puesto: 'operativo' });
+    const b = G.unirse(s, 'B', null, { puesto: 'almacen' });
+    const c = G.unirse(s, 'C', null, { puesto: '' });
+    G.iniciarRonda(s);
+    for (const p of [a, b, c]) assert.ok(p.roles.length >= 1);
+    assert.ok(!a.roles.includes('operativo'));
+    assert.ok(!b.roles.includes('almacen'));
+    assert.equal(a.roles.length + b.roles.length + c.roles.length, 6);
+  }
+});
+
+test('si el puesto hace imposible la restricción, se relaja y se avisa', () => {
+  // Dos jugadores que declaran "Operativo": nadie puede tomar ese eslabón sin romper la regla.
+  const s = G.crearSala(new Map());
+  G.unirse(s, 'A', null, { puesto: 'operativo' });
+  G.unirse(s, 'B', null, { puesto: 'operativo' });
+  G.iniciarRonda(s);
+  assert.equal(s.restriccionRelajada, true);
+  assert.equal(Object.values(s.jugadores).reduce((n, p) => n + p.roles.length, 0), 6);
+  // Con un tercer jugador sin puesto sí hay solución y no se relaja.
+  const t = G.crearSala(new Map());
+  G.unirse(t, 'A', null, { puesto: 'operativo' });
+  G.unirse(t, 'B', null, { puesto: 'operativo' });
+  G.unirse(t, 'C', null, {});
+  G.iniciarRonda(t);
+  assert.equal(t.restriccionRelajada, false);
+  assert.ok(Object.values(t.jugadores).find((p) => p.alias === 'C').roles.includes('operativo'));
+});

@@ -1,44 +1,82 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-bs-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#1F3A5F">
 <title>Despacho Express · Panel</title>
+<link rel="stylesheet" href="/vendor/bootstrap.min.css">
+<link rel="stylesheet" href="/vendor/bootstrap-icons.min.css">
 <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-<header class="h-top">
-  <div class="brand">🚚 Despacho Express</div>
-  <button class="codigo" id="codigo" type="button" title="Copiar enlace para los jugadores" aria-label="Código de sala">····</button>
-  <span class="link" id="link"></span>
-  <span class="grow"></span>
-  <span id="conn" class="small">⏳</span>
-  <button class="btn ghost" id="nueva" type="button" style="color:#fff;border-color:rgba(255,255,255,.5);min-height:36px">＋ Sala nueva</button>
-</header>
-<div class="h-wrap">
-  <aside>
-    <div class="card"><h3>👥 Equipo</h3><div class="seats" id="seats"></div></div>
-    <div class="card"><div class="ctrl" id="ctrl"></div><div id="cfg"></div></div>
-  </aside>
-  <section>
-    <div class="tabsH" role="tablist">
-      <button id="tabVivo" class="on" role="tab" type="button">📡 En vivo</button>
-      <button id="tabCmp" role="tab" type="button">📊 Comparar</button>
-    </div>
-    <div id="vivo">
-      <div class="card strip" id="strip"></div>
-      <div class="card">
-        <svg id="cadena" viewBox="0 0 960 330" role="img" aria-label="Recorrido de la información entre los eslabones"></svg>
-        <div class="leyenda"><span>✉️ nota</span><span>🪪 tarjeta</span><span>🔊 eco</span><span>✏️ corrección</span><span>⚡ incidente</span></div>
+<nav class="navbar bg-brand px-3 py-2">
+  <div class="container-fluid d-flex flex-wrap align-items-center gap-3 text-white">
+    <span class="navbar-brand text-white fw-bold m-0"><i class="bi bi-truck me-2" aria-hidden="true"></i>Despacho Express</span>
+    <button class="btn btn-light codigo px-3 py-2" id="codigo" type="button" title="Copiar el enlace para los jugadores" aria-label="Código de sala">····</button>
+    <span class="small opacity-75 d-none d-md-inline" id="link"></span>
+    <span class="flex-grow-1"></span>
+    <span id="conn" class="small"><i class="bi bi-hourglass-split me-1" aria-hidden="true"></i></span>
+    <button class="btn btn-outline-light btn-sm" id="nueva" type="button"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Sala nueva</button>
+  </div>
+</nav>
+
+<div class="container-fluid py-3">
+  <div class="row g-3">
+    <aside class="col-lg-3">
+      <div class="card shadow-sm mb-3"><div class="card-body">
+        <h2 class="h6 text-uppercase text-body-secondary"><i class="bi bi-people me-1" aria-hidden="true"></i>Equipo</h2>
+        <div class="row g-2" id="seats"></div>
+      </div></div>
+      <div class="card shadow-sm"><div class="card-body">
+        <div class="d-grid gap-2" id="ctrl"></div>
+        <div id="cfg" class="mt-3"></div>
+      </div></div>
+    </aside>
+    <section class="col-lg-9">
+      <ul class="nav nav-pills mb-3" role="tablist">
+        <li class="nav-item"><button class="nav-link active" id="tabVivo" role="tab" type="button"><i class="bi bi-broadcast me-1" aria-hidden="true"></i>En vivo</button></li>
+        <li class="nav-item"><button class="nav-link" id="tabCmp" role="tab" type="button"><i class="bi bi-bar-chart-line me-1" aria-hidden="true"></i>Comparar</button></li>
+      </ul>
+      <div id="vivo">
+        <div class="card shadow-sm mb-3"><div class="card-body d-flex flex-wrap align-items-center gap-3" id="strip"></div></div>
+        <div class="card shadow-sm mb-3"><div class="card-body">
+          <div class="cadena" id="cadena" role="group" aria-label="Recorrido de la información entre los eslabones"></div>
+          <div class="leyenda mt-2">
+            <span><i class="bi bi-envelope ic-nota" aria-hidden="true"></i> nota</span><span><i class="bi bi-person-vcard ic-tarjeta" aria-hidden="true"></i> tarjeta</span>
+            <span><i class="bi bi-megaphone ic-eco" aria-hidden="true"></i> eco</span><span><i class="bi bi-pencil ic-correccion" aria-hidden="true"></i> corrección</span>
+            <span><i class="bi bi-lightning-charge-fill text-primary" aria-hidden="true"></i> incidente</span>
+          </div>
+        </div></div>
+        <div class="card shadow-sm mb-3"><div class="card-body">
+          <h2 class="h6 text-uppercase text-body-secondary"><i class="bi bi-search me-1" aria-hidden="true"></i>Recorrido de cada dato</h2>
+          <div class="table-responsive"><table class="heat" id="heat"></table></div>
+          <div class="mt-2" id="det" style="min-height:34px"></div>
+        </div></div>
+        <div class="card shadow-sm mb-3"><div class="card-body">
+          <h2 class="h6 text-uppercase text-body-secondary"><i class="bi bi-clock-history me-1" aria-hidden="true"></i>Actividad</h2>
+          <div class="ticker" id="ticker"></div>
+        </div></div>
       </div>
-      <div class="card"><h3>🔎 Recorrido de cada dato</h3><div style="overflow:auto"><table class="heat" id="heat"></table></div><div class="det" id="det"></div></div>
-      <div class="card"><h3>🕒 Actividad</h3><div class="ticker" id="ticker"></div></div>
-    </div>
-    <div id="cmp" hidden></div>
-  </section>
+      <div id="cmp" hidden></div>
+    </section>
+  </div>
 </div>
-<aside class="drawer" id="drawer" aria-label="Detalle del eslabón"></aside>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="drawer" aria-labelledby="drawerTitulo">
+  <div class="offcanvas-header"><h2 class="offcanvas-title h5" id="drawerTitulo"></h2><button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Cerrar"></button></div>
+  <div class="offcanvas-body" id="drawerBody"></div>
+</div>
+
+<div class="modal fade" id="modalNueva" tabindex="-1" aria-labelledby="modalNuevaT" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+    <div class="modal-header"><h2 class="modal-title h5" id="modalNuevaT">Sala nueva</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div>
+    <div class="modal-body">La sala actual y su partida se perderán. Descarga el CSV antes si lo necesitas.</div>
+    <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button><button type="button" class="btn btn-primary" id="confirmaNueva">Crear sala nueva</button></div>
+  </div></div>
+</div>
+
+<script src="/vendor/bootstrap.bundle.min.js"></script>
 <script src="/common.js"></script>
 <script src="/host.js"></script>
 </body>

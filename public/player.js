@@ -1,18 +1,17 @@
 (function () {
   'use strict';
-  const { el, chip, mmss, toast, ICON_ROL, ICON_CAMPO, ICON_TIPO, NOMBRE_ROL, ORDEN } = DX;
+  const { el, chip, mmss, toast, ic, icRol, icTipo, NOMBRE_ROL, ORDEN, ICON_CAMPO } = DX;
   const KEY = 'dx_jugador';
   const $app = document.getElementById('app');
   const $top = document.getElementById('top');
   let sesion = null;
   try { sesion = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch { sesion = null; }
   const params = new URLSearchParams(location.search);
-  let S = null, offset = 0, rolSel = null, claveAccion = '', enviadoLocal = {};
+  let S = null, offset = 0, rolSel = null, claveAccion = '', accionNodo = null, enviadoLocal = {};
   const dirtySel = {};
-  const refs = {};
 
   const net = DX.conectar({
-    onAbrir() { if (sesion) net.enviar({ t: 'unirse', code: sesion.code, alias: sesion.alias, token: sesion.token }); else pintarUnirse(); },
+    onAbrir() { if (sesion && sesion.token) net.enviar({ t: 'unirse', code: sesion.code, alias: sesion.alias, token: sesion.token }); else pintarUnirse(); },
     onMensaje(m) {
       if (m.t === 'unido') { sesion = { code: m.code, token: m.token, alias: sesion ? sesion.alias : '' }; guardar(); }
       else if (m.t === 'error') {
@@ -22,113 +21,120 @@
   });
   function guardar() { try { if (sesion) localStorage.setItem(KEY, JSON.stringify(sesion)); else localStorage.removeItem(KEY); } catch { /* ignorar */ } }
 
-  /* ---------- Unirse ---------- */
+  /* ---------- Registro ---------- */
   function pintarUnirse(error) {
-    $top.hidden = true; claveAccion = '';
-    const code = el('input', { type: 'text', maxlength: '4', inputmode: 'text', autocapitalize: 'characters', autocomplete: 'off', 'aria-label': 'Código de sala', value: (params.get('c') || '').toUpperCase(), style: 'text-transform:uppercase;letter-spacing:6px;text-align:center;font-weight:900;font-size:1.4rem' });
-    const alias = el('input', { type: 'text', maxlength: '20', autocomplete: 'off', 'aria-label': 'Tu apodo', placeholder: 'Tu apodo' });
-    const b = el('button', { class: 'btn block', type: 'button', onclick: () => {
-      const c = code.value.trim().toUpperCase(), a = alias.value.trim();
-      if (c.length !== 4 || !a) return toast('Escribe el código de 4 letras y tu apodo.');
+    $top.hidden = true; claveAccion = ''; accionNodo = null;
+    const code = el('input', { type: 'text', class: 'form-control form-control-lg text-center fw-bold text-uppercase', maxlength: '4', autocomplete: 'off', autocapitalize: 'characters', id: 'codigoIn', 'aria-label': 'Código de sala', value: (params.get('c') || '').toUpperCase(), style: 'letter-spacing:.4rem' });
+    const nombre = el('input', { type: 'text', class: 'form-control form-control-lg', maxlength: '20', autocomplete: 'off', id: 'nombreIn', 'aria-label': 'Tu nombre' });
+    const puesto = el('select', { class: 'form-select form-select-lg', id: 'puestoIn', 'aria-label': 'Eslabón parecido a tu trabajo' },
+      el('option', { value: '' }, 'Ninguno o no estoy seguro'), ...ORDEN.map((r) => el('option', { value: r }, NOMBRE_ROL[r])));
+    const b = el('button', { type: 'button', class: 'btn btn-primary btn-lg w-100', id: 'entrarBtn', onclick: () => {
+      const c = code.value.trim().toUpperCase(), a = nombre.value.trim();
+      if (c.length !== 4 || !a) return toast('Escribe el código de 4 letras y tu nombre.');
       sesion = { code: c, token: null, alias: a };
-      net.enviar({ t: 'unirse', code: c, alias: a });
-    } }, '🚀 Entrar');
+      net.enviar({ t: 'unirse', code: c, alias: a, puesto: puesto.value });
+    } }, ic('bi-box-arrow-in-right', 'me-2'), 'Entrar');
     $app.replaceChildren(
-      el('div', { class: 'hero' }, el('h1', {}, '🚚 Despacho Express'), el('p', {}, 'Escribe el código que ves en la pantalla de la facilitadora.')),
-      el('label', { class: 'f' }, el('span', {}, 'Código de sala'), code),
-      el('label', { class: 'f' }, el('span', {}, 'Apodo (no uses tu nombre real)'), alias), b,
-      error ? el('p', { class: 'small', style: 'color:var(--bad)' }, error) : null);
+      el('div', { class: 'card bg-brand border-0 mb-3' }, el('div', { class: 'card-body' },
+        el('h1', { class: 'h3 mb-1' }, ic('bi-truck', 'me-2'), 'Despacho Express'),
+        el('p', { class: 'mb-0 opacity-75' }, 'Escribe el código que ves en la pantalla de la facilitadora.'))),
+      el('div', { class: 'card shadow-sm' }, el('div', { class: 'card-body' },
+        el('label', { class: 'form-label fw-semibold', for: 'codigoIn' }, 'Código de sala'), code,
+        el('label', { class: 'form-label fw-semibold mt-3', for: 'nombreIn' }, 'Tu nombre o apodo'), nombre,
+        el('label', { class: 'form-label fw-semibold mt-3', for: 'puestoIn' }, 'Mi trabajo se parece más a'), puesto,
+        el('div', { class: 'form-text mb-3' }, 'Sirve para que juegues un eslabón distinto al tuyo. El nombre solo se usa para asignar los roles.'), b)),
+      error ? el('div', { class: 'alert alert-danger mt-3' }, error) : null);
   }
 
   /* ---------- Utilidades ---------- */
-  const nombre = (r) => NOMBRE_ROL[r] || r;
   const rolesYo = () => (S.yo ? S.yo.roles : []);
   function miRolActivo() {
-    const rs = rolesYo();
-    if (!rs.length) return null;
+    const rs = rolesYo(); if (!rs.length) return null;
     if (!rolSel || !rs.includes(rolSel)) rolSel = rs[0];
     return rolSel;
   }
   const pedActual = () => (S.ronda ? S.ronda.pedidoActual : 1);
-  function msgsPedido(tipo, filtro) {
-    return (S.mensajes || []).filter((m) => m.pedidoN === pedActual() && (!tipo || m.tipo === tipo) && (!filtro || filtro(m)));
-  }
-  function chipsDatos(datos, estado) { return Object.entries(datos || {}).map(([c, v]) => chip(c, v, estado)); }
-  function enviarMsg(obj) { net.enviar({ t: 'msg', ...obj }); }
+  const msgsPedido = (tipo, filtro) => (S.mensajes || []).filter((m) => m.pedidoN === pedActual() && (!tipo || m.tipo === tipo) && (!filtro || filtro(m)));
+  const chipsDatos = (datos, estado) => Object.entries(datos || {}).map(([c, v]) => chip(c, v, estado));
+  const enviarMsg = (obj) => net.enviar({ t: 'msg', ...obj });
+  const tarjeta = (titulo, ...kids) => el('div', { class: 'card shadow-sm mb-3' }, el('div', { class: 'card-body' }, titulo ? el('h2', { class: 'h6 text-uppercase text-body-secondary mb-2' }, titulo) : null, ...kids));
+  const rolBadge = (rol) => el('span', { class: 'badge text-bg-secondary-subtle border' }, icRol(rol, 'me-1'), NOMBRE_ROL[rol]);
 
-  /* ---------- Render principal ---------- */
+  /* ---------- Render ---------- */
   function render() {
     if (!S || S.tipo !== 'jugador') return;
     $top.hidden = false;
     const rol = miRolActivo();
-    document.getElementById('tRol').textContent = S.yo.observador ? '👀 Observador' : rol ? `${ICON_ROL[rol]} ${nombre(rol)}` : '⏳ Sala';
+    const tRol = document.getElementById('tRol'); tRol.replaceChildren();
+    if (S.yo.observador) tRol.append(ic('bi-eye', 'me-2'), 'Observador');
+    else if (rol) tRol.append(icRol(rol, 'me-2'), NOMBRE_ROL[rol]);
+    else tRol.append(ic('bi-hourglass-split', 'me-2'), 'Sala');
     const r = S.ronda;
-    document.getElementById('tPed').textContent = r && r.estado === 'activa' ? `Ronda ${r.numero} · Pedido ${r.pedidoActual}/${r.pedidosTotal}` : '';
+    document.getElementById('tPed').textContent = r && r.estado === 'activa' ? `R${r.numero} · Pedido ${r.pedidoActual}/${r.pedidosTotal}` : '';
     if (S.fase === 'lobby') return pantallaLobby();
     if (r && r.estado === 'activa') return pantallaJuego(r, rol);
     return pantallaResultado();
   }
 
   function pantallaLobby() {
-    claveAccion = '';
-    document.getElementById('tTm').textContent = '';
+    claveAccion = ''; accionNodo = null; document.getElementById('tTm').textContent = '';
     $app.replaceChildren(
-      el('div', { class: 'hero' }, el('h2', {}, '⏳ Esperando a que empiece'), el('p', {}, `Sala ${S.code} · Eres ${S.yo.alias}`)),
-      el('div', { class: 'card' }, el('h3', {}, 'En la sala'), el('div', { class: 'datos' }, S.jugadores.map((j) => el('span', { class: 'chip' }, j.bot ? '🤖' : '🙂', ' ', j.alias)))));
+      el('div', { class: 'card bg-brand border-0 mb-3' }, el('div', { class: 'card-body' },
+        el('h2', { class: 'h4' }, ic('bi-hourglass-split', 'me-2'), 'Esperando a que empiece'),
+        el('p', { class: 'mb-0 opacity-75' }, `Sala ${S.code}. Entraste como ${S.yo.alias}.`))),
+      tarjeta('En la sala', el('div', {}, S.jugadores.map((j) => el('span', { class: 'dato' }, ic(j.bot ? 'bi-robot' : 'bi-person'), j.alias)))));
   }
 
   function pantallaResultado() {
-    claveAccion = '';
-    document.getElementById('tTm').textContent = '';
+    claveAccion = ''; accionNodo = null; document.getElementById('tTm').textContent = '';
     const res = S.resumenes[S.resumenes.length - 1];
-    const nodos = [el('div', { class: 'hero' }, el('h2', {}, S.fase === 'final' ? '🏁 Fin del juego' : '⏸ Ronda terminada'), el('p', {}, 'Mira la pantalla de la facilitadora.'))];
+    const nodos = [el('div', { class: 'card bg-brand border-0 mb-3' }, el('div', { class: 'card-body' },
+      el('h2', { class: 'h4' }, ic(S.fase === 'final' ? 'bi-flag' : 'bi-pause-circle', 'me-2'), S.fase === 'final' ? 'Fin del juego' : 'Ronda terminada'),
+      el('p', { class: 'mb-0 opacity-75' }, 'Mira la pantalla de la facilitadora.')))];
     if (res) {
-      nodos.push(el('div', { class: 'card' }, el('h3', {}, `Ronda ${res.numero}`),
-        el('div', { class: 'score' }, `${res.puntos}/${res.max}`), el('div', { class: 'bar' }, el('i', { style: `width:${res.puntos / res.max * 100}%` })),
-        el('div', { class: 'datos', style: 'margin-top:8px' }, el('span', { class: 'chip' }, `✅ ${res.perfectos} perfectos`), el('span', { class: 'chip' }, `✉️ ${res.mensajes} mensajes`), el('span', { class: 'chip' }, `✏️ ${res.correcciones} correcciones`))));
+      nodos.push(tarjeta(`Ronda ${res.numero}`,
+        el('div', { class: 'score tabular' }, `${res.puntos}`, el('small', { class: 'fs-5 text-body-secondary' }, `/${res.max}`)),
+        el('div', { class: 'progress my-2', role: 'progressbar', 'aria-valuenow': res.puntos, 'aria-valuemin': 0, 'aria-valuemax': res.max }, el('div', { class: 'progress-bar bg-primary', style: `width:${res.puntos / res.max * 100}%` })),
+        el('span', { class: 'dato' }, ic('bi-check-circle'), `${res.perfectos} perfectos`), el('span', { class: 'dato' }, ic('bi-envelope'), `${res.mensajes} mensajes`), el('span', { class: 'dato' }, ic('bi-pencil'), `${res.correcciones} correcciones`)));
     }
     $app.replaceChildren(...nodos);
   }
 
   function pantallaJuego(r, rol) {
     const nodos = [];
-    // alertas de incidente para mis roles
     (S.alertas || []).filter((a) => a.pedidoN === r.pedidoActual).forEach((a) => {
-      nodos.push(el('div', { class: 'alerta' }, el('b', {}, '⚡ Cambio: '), `${a.texto} `, chip(a.campo, a.nuevo, 'new')));
+      nodos.push(el('div', { class: 'alert alert-warning alerta-cambio shadow-sm' }, el('div', { class: 'fw-bold' }, ic('bi-lightning-charge-fill', 'me-1'), 'Cambio de último momento'), el('div', { class: 'small mb-1' }, a.texto), chip(a.campo, a.nuevo, 'nuevo')));
     });
     if (S.yo.observador || !rol) {
-      nodos.push(el('div', { class: 'card feed' }, el('h3', {}, '👀 Lo que pasa'), ...(S.mensajes || []).slice(-14).reverse().map(filaMensaje)));
+      nodos.push(tarjeta('Lo que pasa', el('div', { class: 'list-group list-group-flush' }, ...(S.mensajes || []).slice(-14).reverse().map(filaMensaje))));
       $app.replaceChildren(...nodos); return;
     }
-    // selector de rol si tengo varios
     if (rolesYo().length > 1) {
-      nodos.push(el('div', { class: 'tabs' }, rolesYo().map((x) => el('button', { type: 'button', class: x === rol ? 'on' : '', onclick: () => { rolSel = x; claveAccion = ''; render(); } }, ICON_ROL[x], ' ', nombre(x)))));
+      nodos.push(el('div', { class: 'btn-group w-100 mb-3', role: 'group', 'aria-label': 'Tus roles' }, rolesYo().map((x) =>
+        el('button', { type: 'button', class: 'btn btn-outline-primary' + (x === rol ? ' active' : ''), onclick: () => { rolSel = x; claveAccion = ''; render(); } }, icRol(x, 'me-1'), NOMBRE_ROL[x]))));
     }
-    // mis datos
     const mis = (S.misCampos || []).filter((c) => c.rol === rol);
-    nodos.push(el('div', { class: 'card' }, el('h3', {}, 'Tus datos'),
-      mis.length ? el('div', { class: 'datos' }, mis.map((c) => chip(c.campo, c.valor, 'big'))) : el('p', { class: 'muted' }, 'No conoces datos por tu cuenta: dependes de tus compañeros.')));
-    // acción: se reconstruye solo si cambia la clave
+    nodos.push(tarjeta('Tus datos', mis.length ? el('div', {}, mis.map((c) => chip(c.campo, c.valor, 'lg'))) : el('p', { class: 'text-body-secondary mb-0' }, 'No conoces datos por tu cuenta: dependes de tus compañeros.')));
     const clave = [r.numero, r.pedidoActual, rol, ultimoEcoId(), sigMensajes(r, rol), S.misCampos ? S.misCampos.map((c) => c.valor).join('|') : ''].join(':');
-    if (clave !== claveAccion || !refs.accion) { refs.accion = construirAccion(r, rol); claveAccion = clave; }
-    nodos.push(refs.accion);
-    nodos.push(el('div', { class: 'card feed' }, el('h3', {}, r.modo === 'notas' ? '✉️ Notas recibidas' : '💬 Mesa'), ...(S.mensajes || []).filter((m) => m.pedidoN === r.pedidoActual).slice(-10).reverse().map(filaMensaje)));
+    if (clave !== claveAccion || !accionNodo) { accionNodo = construirAccion(r, rol); claveAccion = clave; }
+    nodos.push(accionNodo);
+    nodos.push(tarjeta(r.modo === 'notas' ? 'Notas' : 'Mesa de coordinación', el('div', { class: 'list-group list-group-flush' }, ...(S.mensajes || []).filter((m) => m.pedidoN === r.pedidoActual).slice(-10).reverse().map(filaMensaje))));
     $app.replaceChildren(...nodos);
   }
 
   function filaMensaje(m) {
-    return el('div', { class: 'm' }, el('span', {}, ICON_TIPO[m.tipo] || '💬'), el('span', {}, `${ICON_ROL[m.de]}`), el('span', { class: 'muted' }, '→'),
-      el('span', {}, m.a === 'todos' ? '👥' : ICON_ROL[m.a]), chipsDatos(m.datos, 't-' + m.tipo), m.texto ? el('span', { class: 'small' }, m.texto) : null);
+    return el('div', { class: 'list-group-item px-0 d-flex flex-wrap align-items-center gap-1' }, icTipo(m.tipo), icRol(m.de), ic('bi-arrow-right', 'text-body-secondary'),
+      m.a === 'todos' ? ic('bi-people') : icRol(m.a), chipsDatos(m.datos, 't-' + m.tipo), m.texto ? el('span', { class: 'small' }, m.texto) : null);
   }
+  const ultimoEco = () => msgsPedido('eco').pop();
+  const ultimoEcoId = () => (S.ronda && S.ronda.modo === 'chat' && ultimoEco() ? ultimoEco().id : '');
   function sigMensajes(r, rol) {
     if (r.modo === 'notas') { const p = msgsPedido('nota', (m) => m.a === rol).pop(); return p ? p.id : ''; }
     if (rol === 'operativo') return msgsPedido(null, (m) => m.datos && m.tipo !== 'eco').length;
     return msgsPedido('tarjeta', (m) => m.de === rol).length;
   }
-  const ultimoEco = () => msgsPedido('eco').pop();
-  const ultimoEcoId = () => (S.ronda && S.ronda.modo === 'chat' && ultimoEco() ? ultimoEco().id : '');
 
-  /* ---------- Acciones por ronda y rol ---------- */
+  /* ---------- Acciones ---------- */
   function construirAccion(r, rol) {
     if (r.modo === 'notas') return rol === 'operativo' ? accionOperativo(r, rol, true) : accionNota(r, rol);
     return rol === 'operativo' ? accionOperativo(r, rol, false) : accionTarjeta(r, rol);
@@ -140,57 +146,55 @@
     const mis = (S.misCampos || []).filter((c) => c.rol === rol);
     const conocidos = { ...(previa ? previa.datos || {} : {}) };
     mis.forEach((c) => { conocidos[c.campo] = c.valor; });
-    const cajas = {}; const lista = el('div', {});
+    const cajas = {}; const lista = el('div', { class: 'list-group mb-3' });
     Object.keys(conocidos).forEach((c) => {
-      const cb = el('input', { type: 'checkbox', checked: true, id: 'k_' + c }); cajas[c] = cb;
-      lista.append(el('label', { class: 'check', for: 'k_' + c }, cb, chip(c, conocidos[c])));
+      const cb = el('input', { type: 'checkbox', class: 'form-check-input fs-4 m-0', checked: true, id: 'k_' + c }); cajas[c] = cb;
+      lista.append(el('label', { class: 'list-group-item d-flex align-items-center gap-3', for: 'k_' + c }, cb, chip(c, conocidos[c], 'lg')));
     });
-    const estado = el('div', { class: 'small muted' }, enviadoLocal[`n${r.numero}:${r.pedidoActual}:${rol}`] ? '✔ Nota enviada. Puedes reenviarla.' : '');
-    const b = el('button', { class: 'btn block', type: 'button', onclick: () => {
+    const estado = el('div', { class: 'small text-body-secondary mt-2' }, enviadoLocal[`n${r.numero}:${r.pedidoActual}:${rol}`] ? 'Nota enviada. Puedes reenviarla.' : '');
+    const b = el('button', { type: 'button', class: 'btn btn-primary btn-lg w-100', onclick: () => {
       const datos = {}; Object.keys(cajas).forEach((c) => { if (cajas[c].checked) datos[c] = conocidos[c]; });
       if (!Object.keys(datos).length) return toast('Marca al menos un dato.');
       enviarMsg({ como: rol, datos });
-      enviadoLocal[`n${r.numero}:${r.pedidoActual}:${rol}`] = true; estado.textContent = '✔ Nota enviada.';
-    } }, `✉️ Enviar a ${ICON_ROL[ORDEN[i + 1]]} ${nombre(ORDEN[i + 1])}`);
-    return el('div', { class: 'card' }, el('h3', {}, 'Tu nota'),
-      previa ? el('div', { class: 'datos' }, el('span', { class: 'chip' }, `${ICON_ROL[ORDEN[i - 1]]} te pasó:`), chipsDatos(previa.datos)) : (i > 0 ? el('p', { class: 'muted small' }, '⏳ Aún no recibes nada.') : null),
+      enviadoLocal[`n${r.numero}:${r.pedidoActual}:${rol}`] = true; estado.textContent = 'Nota enviada.';
+    } }, ic('bi-envelope-arrow-up', 'me-2'), `Enviar a ${NOMBRE_ROL[ORDEN[i + 1]]}`);
+    return tarjeta('Tu nota',
+      previa ? el('div', { class: 'mb-3' }, el('div', { class: 'small text-body-secondary mb-1' }, 'Te pasó ', rolBadge(ORDEN[i - 1])), chipsDatos(previa.datos)) : (i > 0 ? el('p', { class: 'text-body-secondary small' }, ic('bi-hourglass-split', 'me-1'), 'Aún no recibes nada.') : null),
       lista, b, estado);
   }
 
   function selectorCampo(c, valor, dirtyKey) {
     if (dirtyKey && dirtySel[dirtyKey] && dirtySel[dirtyKey][c]) valor = dirtySel[dirtyKey][c];
-    const s = el('select', { 'data-campo': c, 'aria-label': S.campos[c].label });
+    const s = el('select', { class: 'form-select form-select-lg', 'data-campo': c, 'aria-label': S.campos[c].label });
     if (dirtyKey) s.addEventListener('change', () => { (dirtySel[dirtyKey] = dirtySel[dirtyKey] || {})[c] = s.value; });
-    s.append(el('option', { value: '' }, `${DX.ICON_CAMPO[c]} ${S.campos[c].label}…`));
+    s.append(el('option', { value: '' }, `${S.campos[c].label}…`));
     S.campos[c].opciones.forEach((o) => s.append(el('option', { value: o, selected: o === valor }, o)));
     return s;
   }
+  const campoForm = (c, sel) => el('div', { class: 'mb-2' }, el('label', { class: 'form-label fw-semibold mb-1' }, ic(ICON_CAMPO[c], 'me-1'), S.campos[c].label), sel);
   const leerSelects = (raiz) => { const o = {}; raiz.querySelectorAll('select[data-campo]').forEach((s) => { if (s.value) o[s.dataset.campo] = s.value; }); return o; };
 
   function accionTarjeta(r, rol) {
     const mis = (S.misCampos || []).filter((c) => c.rol === rol);
     const form = el('div', {});
-    mis.forEach((c) => form.append(el('label', { class: 'f' }, el('span', {}, `${DX.ICON_CAMPO[c.campo]} ${S.campos[c.campo].label}`), selectorCampo(c.campo, c.valor))));
+    mis.forEach((c) => form.append(campoForm(c.campo, selectorCampo(c.campo, c.valor))));
     const ya = msgsPedido('tarjeta', (m) => m.de === rol).length > 0;
-    const b = el('button', { class: 'btn block', type: 'button', onclick: () => {
+    const b = el('button', { type: 'button', class: 'btn btn-primary btn-lg w-100', onclick: () => {
       const datos = leerSelects(form);
       if (!Object.keys(datos).length) return toast('Elige tu dato.');
       enviarMsg({ como: rol, a: 'todos', tipo: msgsPedido('tarjeta', (m) => m.de === rol).length ? 'correccion' : 'tarjeta', datos });
-    } }, ya ? '🪪 Actualizar mi tarjeta' : '🪪 Publicar mi tarjeta');
-    const nodos = [el('h3', {}, 'Tu tarjeta de traspaso'), form, b];
-    // eco del operativo: ¿está bien mi dato?
+    } }, ic('bi-person-vcard', 'me-2'), ya ? 'Actualizar mi tarjeta' : 'Publicar mi tarjeta');
+    const nodos = [form, b];
     const eco = ultimoEco();
     if (eco) {
       const filas = mis.map((c) => {
-        const visto = eco.datos ? eco.datos[c.campo] : undefined;
-        const bien = visto === c.valor;
-        return el('div', { class: 'flex', style: 'margin-top:6px' },
-          el('span', {}, '🔊'), chip(c.campo, visto || '—', bien ? 'ok' : 'bad'),
-          bien ? el('span', {}, '✔') : el('button', { class: 'btn', type: 'button', onclick: () => enviarMsg({ como: rol, a: 'todos', tipo: 'correccion', datos: { [c.campo]: c.valor } }) }, `✏️ Es ${c.valor}`));
+        const visto = eco.datos ? eco.datos[c.campo] : undefined; const bien = visto === c.valor;
+        return el('div', { class: 'd-flex align-items-center gap-2 mt-2' }, icTipo('eco'), chip(c.campo, visto || 'sin dato', bien ? 'ok' : 'bad'),
+          bien ? ic('bi-check-lg', 'text-success fs-5') : el('button', { class: 'btn btn-outline-primary btn-sm', type: 'button', onclick: () => enviarMsg({ como: rol, a: 'todos', tipo: 'correccion', datos: { [c.campo]: c.valor } }) }, ic('bi-pencil', 'me-1'), `Es ${c.valor}`));
       });
-      nodos.push(el('div', { class: 'alerta', style: 'background:var(--tint);border-color:var(--c-eco);color:inherit' }, el('b', {}, '🔊 Eco del Operativo'), ...filas));
+      nodos.push(el('div', { class: 'alert alert-info mt-3 mb-0' }, el('div', { class: 'fw-bold' }, icTipo('eco', 'me-1'), 'Eco del Operativo'), ...filas));
     }
-    return el('div', { class: 'card' }, nodos);
+    return tarjeta('Tu tarjeta de traspaso', ...nodos);
   }
 
   function accionOperativo(r, rol, esNotas) {
@@ -200,28 +204,27 @@
     if (esNotas) { const n = msgsPedido('nota', (m) => m.a === rol).pop(); base = n ? n.datos || {} : {}; }
     else base = DX.valoresComunicados(S.mensajes || [], r.pedidoActual);
     const dk = `${r.numero}:${r.pedidoActual}`;
-    DX.CAMPOS_ORDEN.forEach((c) => form.append(el('label', { class: 'f' }, el('span', {}, `${DX.ICON_CAMPO[c]} ${S.campos[c].label}`), selectorCampo(c, base[c], dk))));
+    DX.CAMPOS_ORDEN.forEach((c) => form.append(campoForm(c, selectorCampo(c, base[c], dk))));
     const acciones = [];
     if (!esNotas) {
-      acciones.push(el('button', { class: 'btn block ghost', type: 'button', style: 'margin-bottom:8px', onclick: () => {
+      acciones.push(el('button', { class: 'btn btn-outline-primary btn-lg w-100 mb-2', type: 'button', onclick: () => {
         const datos = leerSelects(form); if (!Object.keys(datos).length) return toast('Completa algún dato para leer el eco.');
         enviarMsg({ como: rol, tipo: 'eco', datos });
-      } }, '🔊 Leer el eco en voz alta'));
+      } }, icTipo('eco', 'me-2'), 'Leer el eco en voz alta'));
     }
-    acciones.push(el('button', { class: 'btn block', type: 'button', onclick: () => {
+    acciones.push(el('button', { class: 'btn btn-primary btn-lg w-100', type: 'button', onclick: () => {
       const datos = leerSelects(form);
       if (Object.keys(datos).length < DX.CAMPOS_ORDEN.length) return toast('Completa los 7 datos antes de enviar.');
       net.enviar({ t: 'pedido', valores: datos });
-    } }, '📤 Enviar despacho'));
+    } }, ic('bi-send', 'me-2'), 'Enviar despacho'));
     const recibido = esNotas
-      ? (base && Object.keys(base).length ? el('div', { class: 'datos' }, el('span', { class: 'chip' }, `${ICON_ROL[ORDEN[i - 1]]} te pasó:`), chipsDatos(base)) : el('p', { class: 'muted small' }, '⏳ Aún no recibes nada.'))
-      : el('p', { class: 'muted small' }, 'Los datos se rellenan con las tarjetas de tus compañeros.');
-    return el('div', { class: 'card' }, el('h3', {}, 'Arma el despacho'), recibido, form, ...acciones);
+      ? (Object.keys(base).length ? el('div', { class: 'mb-3' }, el('div', { class: 'small text-body-secondary mb-1' }, 'Te pasó ', rolBadge(ORDEN[i - 1])), chipsDatos(base)) : el('p', { class: 'text-body-secondary small' }, ic('bi-hourglass-split', 'me-1'), 'Aún no recibes nada.'))
+      : el('p', { class: 'text-body-secondary small' }, 'Los datos se rellenan con las tarjetas de tus compañeros.');
+    return tarjeta('Arma el despacho', recibido, form, ...acciones);
   }
 
-  /* ---------- Reloj ---------- */
   setInterval(() => {
     if (!S || !S.ronda || S.ronda.estado !== 'activa') return;
-    document.getElementById('tTm').textContent = '⏱ ' + mmss(S.ronda.fin - (Date.now() + offset));
+    document.getElementById('tTm').textContent = mmss(S.ronda.fin - (Date.now() + offset));
   }, 250);
 })();
