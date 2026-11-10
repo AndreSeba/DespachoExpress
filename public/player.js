@@ -57,7 +57,7 @@
   const msgsPedido = (tipo, filtro) => (S.mensajes || []).filter((m) => m.pedidoN === pedActual() && (!tipo || m.tipo === tipo) && (!filtro || filtro(m)));
   const chipsDatos = (datos, estado) => Object.entries(datos || {}).map(([c, v]) => chip(c, v, estado));
   const enviarMsg = (obj) => net.enviar({ t: 'msg', ...obj });
-  const tarjeta = (titulo, ...kids) => el('div', { class: 'card shadow-sm mb-3' }, el('div', { class: 'card-body' }, titulo ? el('h2', { class: 'h6 text-uppercase text-body-secondary mb-2' }, titulo) : null, ...kids));
+  const tarjeta = (titulo, ...kids) => el('div', { class: 'card shadow-sm mb-3' }, el('div', { class: 'card-body' }, titulo ? el('h2', { class: 'card-titulo h6 mb-3' }, ...(Array.isArray(titulo) ? [el('span', { class: 'tit-ic' }, ic(titulo[0])), titulo[1]] : [titulo])) : null, ...kids));
   const rolBadge = (rol) => el('span', { class: 'badge text-bg-secondary-subtle border' }, icRol(rol, 'me-1'), NOMBRE_ROL[rol]);
 
   /* ---------- Render ---------- */
@@ -83,7 +83,7 @@
       el('div', { class: 'card bg-brand border-0 mb-3' }, el('div', { class: 'card-body' },
         el('h2', { class: 'h4' }, ic('bi-hourglass-split', 'me-2'), 'Esperando a que empiece'),
         el('p', { class: 'mb-0 opacity-75' }, `Sala ${S.code}. Entraste como ${S.yo.alias}.`))),
-      tarjeta('En la sala', el('div', {}, S.jugadores.map((j) => el('span', { class: 'dato' }, ic(j.bot ? 'bi-robot' : 'bi-person'), j.alias)))));
+      tarjeta(['bi-people', 'En la sala'], el('div', {}, S.jugadores.map((j) => el('span', { class: 'dato' }, ic(j.bot ? 'bi-robot' : 'bi-person'), j.alias)))));
   }
 
   function pantallaResultado() {
@@ -93,7 +93,7 @@
       el('h2', { class: 'h4' }, ic(S.fase === 'final' ? 'bi-flag' : 'bi-pause-circle', 'me-2'), S.fase === 'final' ? 'Fin del juego' : 'Ronda terminada'),
       el('p', { class: 'mb-0 opacity-75' }, 'Mira la pantalla.')))];
     if (res) {
-      nodos.push(tarjeta(`Ronda ${res.numero}`,
+      nodos.push(tarjeta(['bi-flag', `Ronda ${res.numero}`],
         el('div', { class: 'score tabular' }, `${res.puntos}`, el('small', { class: 'fs-5 text-body-secondary' }, `/${res.max}`)),
         el('div', { class: 'progress my-2', role: 'progressbar', 'aria-valuenow': res.puntos, 'aria-valuemin': 0, 'aria-valuemax': res.max }, el('div', { class: 'progress-bar bg-primary', style: `width:${res.puntos / res.max * 100}%` })),
         el('span', { class: 'dato' }, ic('bi-check-circle'), `${res.perfectos} perfectos`), el('span', { class: 'dato' }, ic('bi-envelope'), `${res.mensajes} mensajes`), el('span', { class: 'dato' }, ic('bi-pencil'), `${res.correcciones} correcciones`)));
@@ -132,7 +132,7 @@
       ta.addEventListener('input', () => { est.abiertas[i] = ta.value; });
       return el('div', { class: 'mb-3' }, el('label', { class: 'form-label small fw-semibold', for: 'ab' + i }, q), ta);
     });
-    encNodo = tarjeta('Formulario de satisfacción',
+    encNodo = tarjeta(['bi-clipboard-check', 'Formulario de satisfacción'],
       el('p', { class: 'small text-body-secondary' }, 'Anónimo. 1 = nada de acuerdo, 5 = totalmente de acuerdo.'),
       ...filas, ...abiertas, enviar);
     encNodo.id = 'encuestaCard';
@@ -179,7 +179,7 @@
         el('h2', { class: 'h3 mb-1' }, misRoles.length > 1 ? misRoles.map((x) => NOMBRE_ROL[x]).join(' + ') : NOMBRE_ROL[rol]),
         el('p', { class: 'mb-0 opacity-75' }, misRoles.map((x) => MISION[x]).join(' ')))),
       tarjeta(null, cadenaVista(r, rol)),
-      tarjeta(`Ronda ${r.numero}`, el('div', { class: 'row g-2 text-center' }, PASOS[r.modo === 'notas' ? 'notas' : 'chat'].map(([i, t], n) =>
+      tarjeta(['bi-flag', `Ronda ${r.numero}`], el('div', { class: 'row g-2 text-center' }, PASOS[r.modo === 'notas' ? 'notas' : 'chat'].map(([i, t], n) =>
         el('div', { class: 'col-4' }, el('div', { class: 'paso-m' }, ic(i, 'fs-3'), el('div', { class: 'small fw-semibold mt-1' }, `${n + 1}. ${t}`)))))),
       b);
   }
@@ -190,7 +190,7 @@
       nodos.push(el('div', { class: 'alert alert-warning alerta-cambio shadow-sm' }, el('div', { class: 'fw-bold' }, ic('bi-lightning-charge-fill', 'me-1'), 'Cambio de último momento'), el('div', { class: 'small mb-1' }, a.texto), chip(a.campo, a.nuevo, 'nuevo')));
     });
     if (S.yo.observador || !rol) {
-      nodos.push(tarjeta('Lo que pasa', el('div', { class: 'list-group list-group-flush' }, ...(S.mensajes || []).slice(-14).reverse().map(filaMensaje))));
+      nodos.push(tarjeta(['bi-activity', 'Lo que pasa'], el('div', { class: 'list-group list-group-flush' }, ...(S.mensajes || []).slice(-14).reverse().map(filaMensaje))));
       $app.replaceChildren(...nodos); return;
     }
     if (rolesYo().length > 1) {
@@ -199,11 +199,11 @@
     }
     nodos.push(cadenaVista(r, rol));
     const mis = (S.misCampos || []).filter((c) => c.rol === rol);
-    nodos.push(tarjeta('Tus datos', mis.length ? el('div', {}, mis.map((c) => chip(c.campo, c.valor, 'lg'))) : el('p', { class: 'text-body-secondary mb-0' }, 'No sabes ningún dato. Dependes del equipo.')));
+    nodos.push(tarjeta(['bi-card-checklist', 'Tus datos'], mis.length ? el('div', {}, mis.map((c) => chip(c.campo, c.valor, 'lg'))) : el('p', { class: 'text-body-secondary mb-0' }, 'No sabes ningún dato. Dependes del equipo.')));
     const clave = [r.numero, r.pedidoActual, rol, ultimoEcoId(), sigMensajes(r, rol), S.misCampos ? S.misCampos.map((c) => c.valor).join('|') : ''].join(':');
     if (clave !== claveAccion || !accionNodo) { accionNodo = construirAccion(r, rol); claveAccion = clave; }
     nodos.push(accionNodo);
-    nodos.push(tarjeta(r.modo === 'notas' ? 'Notas' : 'Mesa de coordinación', el('div', { class: 'list-group list-group-flush' }, ...(S.mensajes || []).filter((m) => m.pedidoN === r.pedidoActual).slice(-10).reverse().map(filaMensaje))));
+    nodos.push(tarjeta(r.modo === 'notas' ? ['bi-envelope-paper', 'Notas'] : ['bi-chat-square-text', 'Mesa de coordinación'], el('div', { class: 'list-group list-group-flush' }, ...(S.mensajes || []).filter((m) => m.pedidoN === r.pedidoActual).slice(-10).reverse().map(filaMensaje))));
     $app.replaceChildren(...nodos);
   }
 
@@ -243,7 +243,7 @@
       enviarMsg({ como: rol, datos });
       enviadoLocal[`n${r.numero}:${r.pedidoActual}:${rol}`] = true; estado.textContent = 'Nota enviada.';
     } }, ic('bi-envelope-arrow-up', 'me-2'), `Enviar a ${NOMBRE_ROL[ORDEN[i + 1]]}`);
-    return tarjeta('Tu nota',
+    return tarjeta(['bi-pencil-square', 'Tu nota'],
       previa ? el('div', { class: 'mb-3' }, el('div', { class: 'small text-body-secondary mb-1' }, 'Te pasó ', rolBadge(ORDEN[i - 1])), chipsDatos(previa.datos)) : (i > 0 ? el('p', { class: 'text-body-secondary small' }, ic('bi-hourglass-split', 'me-1'), 'Aún no llega nada.') : null),
       lista, b, estado);
   }
@@ -279,7 +279,7 @@
       });
       nodos.push(el('div', { class: 'alert alert-info mt-3 mb-0' }, el('div', { class: 'fw-bold' }, icTipo('eco', 'me-1'), 'Eco del Operativo'), ...filas));
     }
-    return tarjeta('Tu tarjeta de traspaso', ...nodos);
+    return tarjeta(['bi-person-vcard', 'Tu tarjeta de traspaso'], ...nodos);
   }
 
   function accionOperativo(r, rol, esNotas) {
@@ -305,7 +305,7 @@
     const recibido = esNotas
       ? (Object.keys(base).length ? el('div', { class: 'mb-3' }, el('div', { class: 'small text-body-secondary mb-1' }, 'Te pasó ', rolBadge(ORDEN[i - 1])), chipsDatos(base)) : el('p', { class: 'text-body-secondary small' }, ic('bi-hourglass-split', 'me-1'), 'Aún no llega nada.'))
       : el('p', { class: 'text-body-secondary small' }, 'Se rellena con las tarjetas del equipo.');
-    return tarjeta('Arma el despacho', recibido, form, ...acciones);
+    return tarjeta(['bi-send-check', 'Arma el despacho'], recibido, form, ...acciones);
   }
 
   setInterval(() => {

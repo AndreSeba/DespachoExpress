@@ -4,10 +4,13 @@
   --bs-primary:#E07A2F; --bs-primary-rgb:224,122,47; --bs-link-color:#1F3A5F;
   --c-nota:#2B6CB0; --c-tarjeta:#0E9AA7; --c-eco:#7C4DBA; --c-correccion:#E07A2F; --c-msg:#6B7B8C;
 }
-[data-bs-theme="dark"]{ --brand-navy:#2B4C7A; --bs-link-color:#8fb4e6; }
+/* Colores de tema para componentes de Bootstrap (variables de modos de color, docs 5.3) */
+:root{ --bs-primary-bg-subtle:#fbe6d5; --bs-primary-text-emphasis:#6b3410; --bs-primary-border-subtle:#f3c9a6; --bs-card-radius:1rem }
+[data-bs-theme="dark"]{ --brand-navy:#2B4C7A; --bs-link-color:#8fb4e6;
+  --bs-primary-bg-subtle:#3d2412; --bs-primary-text-emphasis:#f0b98a; --bs-primary-border-subtle:#7a3f16 }
 body{background:var(--bs-tertiary-bg)}
 .btn-primary{--bs-btn-bg:#E07A2F;--bs-btn-border-color:#E07A2F;--bs-btn-hover-bg:#C96A24;--bs-btn-hover-border-color:#C96A24;--bs-btn-active-bg:#B85F1F;--bs-btn-active-border-color:#B85F1F;--bs-btn-disabled-bg:#E07A2F;--bs-btn-disabled-border-color:#E07A2F;--bs-btn-color:#fff;--bs-btn-hover-color:#fff;--bs-btn-active-color:#fff}
-.bg-brand{background:var(--brand-navy)!important;color:#fff}
+.bg-brand{background-color:var(--brand-navy)!important;background-image:var(--bs-gradient);color:#fff}
 .text-brand{color:var(--brand-navy)}
 .btn:focus-visible,.form-select:focus-visible,.form-control:focus-visible,button:focus-visible{outline:3px solid var(--brand-orange);outline-offset:2px}
 .tabular{font-variant-numeric:tabular-nums}
@@ -84,3 +87,29 @@ table.heat td{padding:0;text-align:center}
 .rol-pop{animation:pop .5s cubic-bezier(.2,1.6,.4,1)}
 @keyframes pop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
 @media (prefers-reduced-motion:reduce){.rol-pop{animation:none}}
+
+
+/* ===== Rediseño con variables de Bootstrap ===== */
+/* Tarjetas: variables --bs-card-* (docs: Card > CSS variables) */
+.card{--bs-card-border-radius:var(--bs-card-radius);--bs-card-inner-border-radius:calc(var(--bs-card-radius) - 1px);--bs-card-spacer-y:1.1rem;--bs-card-spacer-x:1.1rem}
+.card.shadow-sm{box-shadow:0 .25rem .75rem rgba(31,58,95,.08)!important}
+/* Título de tarjeta con icono en círculo tintado (bg-primary-subtle) */
+.card-titulo{display:flex;align-items:center;gap:.6rem;font-weight:700;color:var(--bs-emphasis-color)}
+.tit-ic{display:inline-flex;align-items:center;justify-content:center;width:2rem;height:2rem;border-radius:50%;background:var(--bs-primary-bg-subtle);color:var(--bs-primary-text-emphasis);font-size:1rem;flex:none}
+/* Componentes con marca: sustituyen el azul por defecto */
+.nav-pills{--bs-nav-pills-link-active-bg:var(--brand-navy);--bs-nav-pills-link-active-color:#fff}
+.nav-pills .nav-link{font-weight:600}
+[data-bs-theme="dark"] .nav-pills{--bs-nav-pills-link-active-bg:#3a5f94}
+.btn-outline-primary{--bs-btn-color:var(--bs-link-color);--bs-btn-border-color:var(--bs-link-color);--bs-btn-hover-color:#fff;--bs-btn-hover-bg:var(--brand-navy);--bs-btn-hover-border-color:var(--brand-navy);--bs-btn-active-color:#fff;--bs-btn-active-bg:var(--brand-navy);--bs-btn-active-border-color:var(--brand-navy);--bs-btn-focus-shadow-rgb:224,122,47;--bs-btn-disabled-color:var(--bs-link-color);--bs-btn-disabled-border-color:var(--bs-link-color);font-weight:600}
+.btn-group>.btn-outline-primary{padding-block:.7rem}
+.btn-check:checked+.btn-outline-primary{--bs-btn-color:#fff;background:var(--brand-navy);border-color:var(--brand-navy);color:#fff}
+.form-check-input:checked{background-color:var(--brand-orange);border-color:var(--brand-orange)}
+.form-check-input:focus,.form-control:focus,.form-select:focus{border-color:var(--brand-orange);box-shadow:0 0 0 .25rem rgba(224,122,47,.25)}
+.btn-primary{font-weight:700;box-shadow:0 .2rem .5rem rgba(224,122,47,.35)}
+.btn-primary:disabled{box-shadow:none}
+/* Barra superior del jugador: sin saltos de línea */
+#top>div{flex-wrap:nowrap}
+#tRol{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tPed,#tTm{white-space:nowrap}
+/* Pasos del briefing más legibles */
+.paso-m{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;box-shadow:0 .15rem .4rem rgba(31,58,95,.06)}
