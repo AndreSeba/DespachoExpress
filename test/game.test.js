@@ -259,3 +259,23 @@ test('compuerta: si un humano pendiente se desconecta, la ronda arranca', () => 
   assert.equal(G.comprobarListos(s), true);
   assert.equal(r.estado, 'activa');
 });
+
+test('hechos: el equipo ve el resultado de cada pedido enviado sin los valores reales', () => {
+  const s = G.crearSala(new Map(), { rondaSeg: 60, pedidos: 3 });
+  const humanos = ['A', 'B', 'C', 'D', 'E', 'F'].map((a) => G.unirse(s, a));
+  G.iniciarRonda(s);
+  const op = humanos.find((p) => p.roles.includes('operativo'));
+  const otro = humanos.find((p) => p !== op);
+  assert.deepEqual(G.snapshot(s, { tipo: 'jugador', jugadorId: otro.id }).hechos, []);
+  const ped = s.actual.pedidos[0];
+  const valores = { ...ped.real };
+  const real = ped.real.producto;
+  valores.producto = G.CAMPOS.producto.opciones.find((o) => o !== real);
+  G.enviarPedido(s, op.id, valores);
+  const h = G.snapshot(s, { tipo: 'jugador', jugadorId: otro.id }).hechos;
+  assert.equal(h.length, 1);
+  assert.equal(h[0].perfecto, false);
+  assert.deepEqual(h[0].errores, ['producto']);
+  assert.equal(h[0].puntos, 6);
+  assert.ok(!Object.values(h[0]).includes(real));
+});

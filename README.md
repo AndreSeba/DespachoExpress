@@ -31,6 +31,14 @@ Pensado para mirar y tocar, con poco texto:
 - **Comparar:** ronda 1 frente a ronda 2 con barras, mapas de aciertos por pedido y el campo más errado.
 - **Controles:** ▶ iniciar ronda, incidente (o automático), ⏹ cerrar, ↺ nueva partida, ⬇ CSV, y ajustes de duración y número de pedidos.
 
+## Para que sea divertido (jugadores)
+- **Resultado al instante:** cada pedido enviado avisa a todo el equipo con sus puntos, la racha de pedidos perfectos y qué dato falló (sin revelar el valor real).
+- **Marcador vivo:** un círculo por pedido, racha y puntos.
+- **Paquetes que vuelan** entre eslabones cuando alguien envía una nota, tarjeta o eco.
+- **Reloj con urgencia:** barra de tiempo y latido en el último minuto.
+- **Cuenta de arranque, confeti y vibración** en el celular. El sonido está apagado por defecto (botón de altavoz arriba).
+- **Al terminar la ronda:** hasta 3 estrellas e insignias (todo perfecto, racha, correcciones a tiempo, más puntos que la ronda anterior). Son un juego: no prueban una mejora real.
+
 ## Formulario de satisfacción (anónimo)
 Al terminar el juego, cada participante responde desde su celular 8 afirmaciones (escala de 1 a 5) y 3 preguntas abiertas.
 - No se guarda quién dio cada respuesta, solo un registro de quién ya respondió para evitar duplicados.
@@ -48,8 +56,8 @@ Al terminar el juego, cada participante responde desde su celular 8 afirmaciones
 **Local (sin internet, por WiFi):** en la laptop, `pnpm install && pnpm start`. Los celulares abren `http://IP-DE-LA-LAPTOP:3000`.
 
 **En línea (Render, plan gratis):** crear un *Web Service* con estos valores (o usar `render.yaml`):
-- Root Directory: (vacío, la raíz del repositorio)
-- Build Command: `pnpm install --frozen-lockfile --prod` · Start Command: `node server.js` · Health check: `/health`
+- Root Directory: `despacho-express`
+- Build Command: `corepack enable && pnpm install --frozen-lockfile --prod` · Start Command: `node server.js` · Health check: `/health`
 
 Avisos del plan gratis: el servicio se duerme tras un rato sin uso y tarda cerca de un minuto en despertar (ábrelo antes de empezar), y las salas viven en memoria, así que se pierden si se reinicia. No se guarda nada en disco; al terminar, descarga el CSV.
 

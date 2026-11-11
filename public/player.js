@@ -46,6 +46,89 @@
       error ? el('div', { class: 'alert alert-danger mt-3' }, error) : null);
   }
 
+  /* ---------- Efectos (ver fun.js) ---------- */
+  const F = DX.fun;
+  const eslabonDe = (rol) => { const i = ORDEN.indexOf(rol); const l = $app.querySelectorAll('.cadena-m .eslabon'); return i >= 0 ? l[i] : null; };
+  const volar = (de, a, tipo, retraso) => F.vuelo(eslabonDe(de), eslabonDe(a), DX.ICON_TIPO[tipo] || 'bi-envelope', DX.COLOR_TIPO[tipo], retraso);
+  const rachaAhora = (h) => { let n = 0; for (let i = h.length - 1; i >= 0 && h[i].perfecto; i--) n++; return n; };
+  const rachaMax = (h) => { let m = 0, n = 0; h.forEach((x) => { n = x.perfecto ? n + 1 : 0; m = Math.max(m, n); }); return m; };
+  const prev = { listo: false, num: 0, est: '', hechos: {}, msgs: new Set(), alertas: new Set(), resFx: '' };
+
+  function resultadoPedido(x, h) {
+    const racha = rachaAhora(h);
+    const falla = x.errores.map((c) => el('span', { class: 'dato bad' }, ic(ICON_CAMPO[c]), S.campos[c].label));
+    F.aviso(el('div', { class: 'd-flex align-items-center gap-3' },
+      el('div', { class: 'aviso-ic' }, ic(x.perfecto ? 'bi-patch-check-fill' : 'bi-exclamation-diamond-fill')),
+      el('div', { class: 'flex-grow-1' },
+        el('div', { class: 'fw-bold fs-5' }, `Pedido ${x.n}: ${x.puntos}/${S.maxPorPedido}`),
+        x.perfecto ? el('div', {}, racha > 1 ? [ic('bi-fire', 'me-1'), `Racha de ${racha}`] : 'Perfecto') : el('div', {}, falla))),
+    x.perfecto ? 'aviso-ok' : 'aviso-mal', 3400);
+    if (x.perfecto) { F.sonar('perfecto'); F.vibrar([80, 40, 80, 40, 160]); F.confeti(racha > 1 ? 60 : 36); }
+    else { F.sonar(x.puntos >= 5 ? 'casi' : 'error'); F.vibrar(240); }
+  }
+
+  function arranque() { F.splash('A despachar'); F.sonar('arranque'); F.vibrar([60, 40, 60]); }
+
+  function efectos() {
+    const r = S && S.ronda; if (!r) { prev.est = ''; return; }
+    const h = S.hechos || []; const clave = `${r.numero}:${r.estado}`;
+    if (!prev.listo || prev.num !== r.numero) {
+      // primera carga, reconexión o ronda nueva: registrar sin celebrar
+      const primera = !prev.listo;
+      prev.listo = true; prev.num = r.numero; prev.hechos[r.numero] = h.length;
+      prev.msgs = new Set((S.mensajes || []).map((m) => m.id)); prev.alertas = new Set((S.alertas || []).map((a) => a.id));
+      if (!primera && r.estado === 'activa') arranque();
+      prev.est = clave; return;
+    }
+    if (clave !== prev.est) { if (r.estado === 'activa') arranque(); prev.est = clave; }
+    const antes = prev.hechos[r.numero] || 0;
+    if (h.length > antes) resultadoPedido(h[h.length - 1], h);
+    prev.hechos[r.numero] = h.length;
+    const rol = miRolActivo(); const mios = new Set(rolesYo());
+    const nuevos = (S.mensajes || []).filter((m) => !prev.msgs.has(m.id)); nuevos.forEach((m) => prev.msgs.add(m.id));
+    let k = 0;
+    nuevos.filter((m) => !mios.has(m.de)).slice(-3).forEach((m) => {
+      const hacia = m.a === 'todos' ? rol : (mios.has(m.a) ? m.a : null);
+      if (r.estado === 'activa' && rol && hacia) { volar(m.de, hacia, m.tipo, k++ * 180); F.sonar('tic'); F.vibrar(25); }
+    });
+    const nuevasA = (S.alertas || []).filter((a) => !prev.alertas.has(a.id)); nuevasA.forEach((a) => prev.alertas.add(a.id));
+    if (nuevasA.length) {
+      F.sonar('incidente'); F.vibrar([180, 70, 180]);
+      const al = $app.querySelectorAll('.alerta-cambio'); if (al.length) al[al.length - 1].classList.add('sacude');
+    }
+  }
+
+  /** Marcador del equipo: un círculo por pedido, racha y puntos. */
+  function marcador(r) {
+    const h = S.hechos || []; const racha = rachaAhora(h); const pts = h.reduce((s, x) => s + x.puntos, 0);
+    const bolas = [];
+    for (let n = 1; n <= r.pedidosTotal; n++) {
+      const x = h.find((y) => y.n === n);
+      const cls = x ? (x.perfecto ? 'ok' : 'regular') : (n === r.pedidoActual ? 'act' : '');
+      bolas.push(el('span', { class: 'bola ' + cls, title: `Pedido ${n}` }, x ? ic(x.perfecto ? 'bi-check-lg' : 'bi-exclamation-lg') : String(n)));
+    }
+    return el('div', { class: 'marcador mb-3', id: 'marcador' }, el('div', { class: 'd-flex gap-1 flex-wrap flex-grow-1' }, bolas),
+      racha > 1 ? el('span', { class: 'racha' }, ic('bi-fire'), `x${racha}`) : null,
+      el('span', { class: 'pts tabular' }, ic('bi-trophy-fill', 'me-1'), String(pts)));
+  }
+
+  /** Estrellas e insignias al terminar la ronda. */
+  function logros(res) {
+    const h = S.hechos || []; const frac = res.max ? res.puntos / res.max : 0;
+    const n = frac >= 0.95 ? 3 : frac >= 0.7 ? 2 : frac >= 0.4 ? 1 : 0;
+    const estrellas = el('div', { class: 'estrellas', 'aria-label': `${n} de 3 estrellas` }, [1, 2, 3].map((i) => el('span', { class: 'estrella' + (i <= n ? ' on' : ''), style: `animation-delay:${0.2 + i * 0.25}s` }, ic(i <= n ? 'bi-star-fill' : 'bi-star'))));
+    const ins = []; const total = S.ronda ? S.ronda.pedidosTotal : 0; const rm = rachaMax(h);
+    if (total && res.perfectos === total) ins.push(['bi-trophy-fill', 'Todo perfecto']);
+    if (rm >= 2) ins.push(['bi-fire', `Racha de ${rm}`]);
+    if (res.correcciones > 0) ins.push(['bi-pencil-fill', `${res.correcciones} ${res.correcciones === 1 ? 'corrección' : 'correcciones'} a tiempo`]);
+    const antes = S.resumenes[S.resumenes.length - 2];
+    if (antes && res.puntos > antes.puntos) ins.push(['bi-graph-up-arrow', 'Más puntos que la ronda anterior']);
+    if (!ins.length) ins.push(['bi-lightbulb', 'A practicar el eco']);
+    const clave = `${res.numero}:${S.fase}`;
+    if (n >= 2 && prev.resFx !== clave) { prev.resFx = clave; setTimeout(() => { F.confeti(60); F.sonar('perfecto'); F.vibrar([80, 40, 80]); }, 400); }
+    return tarjeta(['bi-award', 'Logros'], estrellas, el('div', { class: 'd-flex flex-wrap justify-content-center gap-2' }, ins.map(([i, t], k) => el('span', { class: 'insignia', style: `animation-delay:${1 + k * 0.2}s` }, ic(i), t))));
+  }
+
   /* ---------- Utilidades ---------- */
   const rolesYo = () => (S.yo ? S.yo.roles : []);
   function miRolActivo() {
@@ -61,7 +144,8 @@
   const rolBadge = (rol) => el('span', { class: 'badge text-bg-secondary-subtle border' }, icRol(rol, 'me-1'), NOMBRE_ROL[rol]);
 
   /* ---------- Render ---------- */
-  function render() {
+  function render() { dibujar(); requestAnimationFrame(efectos); }
+  function dibujar() {
     if (!S || S.tipo !== 'jugador') return;
     $top.hidden = false;
     const rol = miRolActivo();
@@ -98,6 +182,7 @@
         el('div', { class: 'progress my-2', role: 'progressbar', 'aria-valuenow': res.puntos, 'aria-valuemin': 0, 'aria-valuemax': res.max }, el('div', { class: 'progress-bar bg-primary', style: `width:${res.puntos / res.max * 100}%` })),
         el('span', { class: 'dato' }, ic('bi-check-circle'), `${res.perfectos} perfectos`), el('span', { class: 'dato' }, ic('bi-envelope'), `${res.mensajes} mensajes`), el('span', { class: 'dato' }, ic('bi-pencil'), `${res.correcciones} correcciones`)));
     }
+    if (res) nodos.push(logros(res));
     if (S.fase === 'final' && S.encuesta) nodos.push(formularioEncuesta());
     $app.replaceChildren(...nodos);
   }
@@ -171,7 +256,7 @@
     const nListos = pr.listos.filter((id) => pr.requeridos.includes(id)).length;
     const b = yaListo
       ? el('div', { class: 'alert alert-success text-center mb-0', id: 'esperandoListos' }, ic('bi-hourglass-split', 'me-2'), `Esperando al equipo: ${nListos} de ${pr.requeridos.length}`)
-      : el('button', { type: 'button', class: 'btn btn-primary btn-lg w-100', id: 'entendidoBtn', onclick: () => net.enviar({ t: 'listo' }) }, ic('bi-play-fill', 'me-2'), 'Listo');
+      : el('button', { type: 'button', class: 'btn btn-primary btn-lg w-100', id: 'entendidoBtn', onclick: () => { F.sonar('listo'); F.vibrar(40); net.enviar({ t: 'listo' }); } }, ic('bi-play-fill', 'me-2'), 'Listo');
     $app.replaceChildren(
       el('div', { class: 'card bg-brand border-0 mb-3 text-center' }, el('div', { class: 'card-body py-4' },
         el('div', { class: 'small text-uppercase opacity-75' }, 'Te tocó'),
@@ -197,6 +282,7 @@
       nodos.push(el('div', { class: 'btn-group w-100 mb-3', role: 'group', 'aria-label': 'Tus roles' }, rolesYo().map((x) =>
         el('button', { type: 'button', class: 'btn btn-outline-primary' + (x === rol ? ' active' : ''), onclick: () => { rolSel = x; claveAccion = ''; render(); } }, icRol(x, 'me-1'), NOMBRE_ROL[x]))));
     }
+    nodos.push(marcador(r));
     nodos.push(cadenaVista(r, rol));
     const mis = (S.misCampos || []).filter((c) => c.rol === rol);
     nodos.push(tarjeta(['bi-card-checklist', 'Tus datos'], mis.length ? el('div', {}, mis.map((c) => chip(c.campo, c.valor, 'lg'))) : el('p', { class: 'text-body-secondary mb-0' }, 'No sabes ningún dato. Dependes del equipo.')));
@@ -240,7 +326,7 @@
     const b = el('button', { type: 'button', class: 'btn btn-primary btn-lg w-100', onclick: () => {
       const datos = {}; Object.keys(cajas).forEach((c) => { if (cajas[c].checked) datos[c] = conocidos[c]; });
       if (!Object.keys(datos).length) return toast('Marca al menos un dato.');
-      enviarMsg({ como: rol, datos });
+      enviarMsg({ como: rol, datos }); volar(rol, ORDEN[i + 1], 'nota'); F.sonar('envio'); F.vibrar(30);
       enviadoLocal[`n${r.numero}:${r.pedidoActual}:${rol}`] = true; estado.textContent = 'Nota enviada.';
     } }, ic('bi-envelope-arrow-up', 'me-2'), `Enviar a ${NOMBRE_ROL[ORDEN[i + 1]]}`);
     return tarjeta(['bi-pencil-square', 'Tu nota'],
@@ -267,7 +353,8 @@
     const b = el('button', { type: 'button', class: 'btn btn-primary btn-lg w-100', onclick: () => {
       const datos = leerSelects(form);
       if (!Object.keys(datos).length) return toast('Elige tu dato.');
-      enviarMsg({ como: rol, a: 'todos', tipo: msgsPedido('tarjeta', (m) => m.de === rol).length ? 'correccion' : 'tarjeta', datos });
+      const tipo = msgsPedido('tarjeta', (m) => m.de === rol).length ? 'correccion' : 'tarjeta';
+      enviarMsg({ como: rol, a: 'todos', tipo, datos }); volar(rol, 'operativo', tipo); F.sonar('envio'); F.vibrar(30);
     } }, ic('bi-person-vcard', 'me-2'), ya ? 'Actualizar mi tarjeta' : 'Publicar mi tarjeta');
     const nodos = [form, b];
     const eco = ultimoEco();
@@ -275,7 +362,7 @@
       const filas = mis.map((c) => {
         const visto = eco.datos ? eco.datos[c.campo] : undefined; const bien = visto === c.valor;
         return el('div', { class: 'd-flex align-items-center gap-2 mt-2' }, icTipo('eco'), chip(c.campo, visto || 'sin dato', bien ? 'ok' : 'bad'),
-          bien ? ic('bi-check-lg', 'text-success fs-5') : el('button', { class: 'btn btn-outline-primary btn-sm', type: 'button', onclick: () => enviarMsg({ como: rol, a: 'todos', tipo: 'correccion', datos: { [c.campo]: c.valor } }) }, ic('bi-pencil', 'me-1'), `Es ${c.valor}`));
+          bien ? ic('bi-check-lg', 'text-success fs-5') : el('button', { class: 'btn btn-outline-primary btn-sm', type: 'button', onclick: () => { enviarMsg({ como: rol, a: 'todos', tipo: 'correccion', datos: { [c.campo]: c.valor } }); volar(rol, 'operativo', 'correccion'); F.sonar('envio'); F.vibrar(30); } }, ic('bi-pencil', 'me-1'), `Es ${c.valor}`));
       });
       nodos.push(el('div', { class: 'alert alert-info mt-3 mb-0' }, el('div', { class: 'fw-bold' }, icTipo('eco', 'me-1'), 'Eco del Operativo'), ...filas));
     }
@@ -295,12 +382,13 @@
       acciones.push(el('button', { class: 'btn btn-outline-primary btn-lg w-100 mb-2', type: 'button', onclick: () => {
         const datos = leerSelects(form); if (!Object.keys(datos).length) return toast('Completa algún dato para leer el eco.');
         enviarMsg({ como: rol, tipo: 'eco', datos });
+        ORDEN.filter((x) => x !== rol).forEach((x, k) => volar(rol, x, 'eco', k * 110)); F.sonar('envio'); F.vibrar(30);
       } }, icTipo('eco', 'me-2'), 'Leer el eco en voz alta'));
     }
     acciones.push(el('button', { class: 'btn btn-primary btn-lg w-100', type: 'button', onclick: () => {
       const datos = leerSelects(form);
       if (Object.keys(datos).length < DX.CAMPOS_ORDEN.length) return toast('Completa los 7 datos antes de enviar.');
-      net.enviar({ t: 'pedido', valores: datos });
+      net.enviar({ t: 'pedido', valores: datos }); F.sonar('envio'); F.vibrar(40);
     } }, ic('bi-send', 'me-2'), 'Enviar despacho'));
     const recibido = esNotas
       ? (Object.keys(base).length ? el('div', { class: 'mb-3' }, el('div', { class: 'small text-body-secondary mb-1' }, 'Te pasó ', rolBadge(ORDEN[i - 1])), chipsDatos(base)) : el('p', { class: 'text-body-secondary small' }, ic('bi-hourglass-split', 'me-1'), 'Aún no llega nada.'))
@@ -308,8 +396,19 @@
     return tarjeta(['bi-send-check', 'Arma el despacho'], recibido, form, ...acciones);
   }
 
+  /* ---------- Sonido, barra de tiempo y urgencia ---------- */
+  const sb = document.getElementById('sonidoBtn');
+  const pintarSb = () => { sb.replaceChildren(ic(F.sonido ? 'bi-volume-up-fill' : 'bi-volume-mute')); sb.setAttribute('aria-pressed', String(F.sonido)); sb.setAttribute('aria-label', F.sonido ? 'Quitar sonido' : 'Poner sonido'); };
+  sb.addEventListener('click', () => { F.alternarSonido(); pintarSb(); }); pintarSb();
+  let ultimoTic = 0;
   setInterval(() => {
-    if (!S || !S.ronda || S.ronda.estado !== 'activa') return;
-    document.getElementById('tTm').textContent = mmss(S.ronda.fin - (Date.now() + offset));
+    const tTm = document.getElementById('tTm'); const barra = document.getElementById('barraT');
+    if (!S || !S.ronda || S.ronda.estado !== 'activa') { tTm.classList.remove('urgente', 'critico'); barra.style.width = '0'; return; }
+    const ms = S.ronda.fin - (Date.now() + offset); const seg = Math.ceil(ms / 1000);
+    tTm.textContent = mmss(ms);
+    tTm.classList.toggle('urgente', seg <= 60 && seg > 10); tTm.classList.toggle('critico', seg <= 10);
+    barra.style.width = Math.max(0, Math.min(100, ms / Math.max(1, S.ronda.fin - S.ronda.inicio) * 100)) + '%';
+    barra.classList.toggle('baja', seg <= 60);
+    if (seg <= 10 && seg > 0 && seg !== ultimoTic) { ultimoTic = seg; F.sonar('reloj'); F.vibrar(20); }
   }, 250);
 })();

@@ -8,18 +8,24 @@
 <link rel="stylesheet" href="/vendor/bootstrap.min.css">
 <link rel="stylesheet" href="/vendor/bootstrap-icons.min.css">
 <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/fun.css">
 </head>
 <body>
 <nav class="navbar bg-brand p-nav px-3 py-2" id="top" hidden>
   <div class="d-flex w-100 align-items-center justify-content-between gap-2 text-white">
     <div class="fw-bold" id="tRol"></div>
     <div class="small" id="tPed"></div>
-    <div class="fw-bold fs-5 tabular" id="tTm"></div>
+    <div class="d-flex align-items-center gap-1">
+      <div class="fw-bold fs-5 tabular" id="tTm"></div>
+      <button type="button" class="btn btn-sm btn-outline-light border-0" id="sonidoBtn" aria-pressed="false"><i class="bi bi-volume-mute" aria-hidden="true"></i></button>
+    </div>
   </div>
+  <div class="barra-tiempo" id="barraT" aria-hidden="true"></div>
 </nav>
 <main class="container p-main py-3" id="app" aria-live="polite"></main>
 <script src="/vendor/bootstrap.bundle.min.js"></script>
 <script src="/common.js"></script>
+<script src="/fun.js"></script>
 <script src="/player.js"></script>
 </body>
 </html>

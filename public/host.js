@@ -170,8 +170,11 @@
       dots.append(el('button', { type: 'button', class: cls, 'aria-label': `Pedido ${p.n}`, onclick: () => { selPedido = p.n; selCelda = null; render(); } }, cont));
     });
     const puntos = peds.reduce((s, p) => s + (p.enviado ? p.puntos : 0), 0);
+    const enviados = peds.filter((p) => p.enviado); let racha = 0;
+    for (let i = enviados.length - 1; i >= 0 && enviados[i].puntos === S.maxPorPedido; i--) racha++;
     f.append(r.estado === 'activa' ? ring : el('span', { class: 'badge text-bg-secondary fs-6' }, ic(r.motivo === 'completa' ? 'bi-flag' : 'bi-stop-fill', 'me-1'), r.motivo === 'completa' ? 'Completa' : 'Cerrada'),
       badge, dots, el('div', { class: 'flex-grow-1' }),
+      racha > 1 ? el('span', { class: 'racha me-3' }, ic('bi-fire'), `x${racha}`) : null,
       el('div', { class: 'text-end' }, el('div', { class: 'score tabular' }, String(puntos)), el('div', { class: 'small text-body-secondary' }, `de ${peds.length * S.maxPorPedido}`)));
     actualizarReloj();
   }
