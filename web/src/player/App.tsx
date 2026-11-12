@@ -38,6 +38,8 @@ export default function App() {
   const roles = S?.yo?.roles ?? [];
   const rol = roles.length ? (rolSel && roles.includes(rolSel) ? rolSel : roles[0]) : null;
   useEfectos(S, rol, (x, racha) => setAviso({ x, racha, id: Date.now() }));
+  const numeroRonda = S?.ronda?.numero;
+  useEffect(() => { setAviso(null); }, [numeroRonda]);
   useEffect(() => { if (!aviso) return; const t = setTimeout(() => setAviso(null), 3400); return () => clearTimeout(t); }, [aviso]);
 
   const enviarMsg = useCallback((o: object) => enviar({ t: 'msg', ...o }), [enviar]);

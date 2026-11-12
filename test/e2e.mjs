@@ -28,6 +28,8 @@ console.log('sala', code);
 const pctx = await browser.newContext({ ...devices['iPhone 13'] });
 const jug = await pctx.newPage(); vigila(jug, 'jugador');
 await jug.goto(`${base}/?c=${code}`);
+// Para las capturas del manual: encabezado sin quedar flotando en mitad de la imagen
+if (process.env.SHOTS) await jug.addStyleTag({ content: 'header.sticky{position:static!important}.aviso{display:none!important}' });
 await jug.fill('#nombreIn', 'Camila');
 await jug.selectOption('#puestoIn', 'operativo');
 await jug.click('#entrarBtn');

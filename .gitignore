@@ -1,4 +1,4 @@
 node_modules/
 *.log
 .env
-dist/
+# dist/ se versiona a propósito: Render lo sirve sin compilar (el Build Command actual no corre `pnpm build`).
