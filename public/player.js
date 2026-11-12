@@ -182,6 +182,7 @@
         el('div', { class: 'progress my-2', role: 'progressbar', 'aria-valuenow': res.puntos, 'aria-valuemin': 0, 'aria-valuemax': res.max }, el('div', { class: 'progress-bar bg-primary', style: `width:${res.puntos / res.max * 100}%` })),
         el('span', { class: 'dato' }, ic('bi-check-circle'), `${res.perfectos} perfectos`), el('span', { class: 'dato' }, ic('bi-envelope'), `${res.mensajes} mensajes`), el('span', { class: 'dato' }, ic('bi-pencil'), `${res.correcciones} correcciones`)));
     }
+    if (res) nodos.push(recorrido(res));
     if (res) nodos.push(logros(res));
     if (S.fase === 'final' && S.encuesta) nodos.push(formularioEncuesta());
     $app.replaceChildren(...nodos);
@@ -224,9 +225,41 @@
     return encNodo;
   }
 
+  const ROL_DE_CAMPO = { destino: 'planificacion', horario: 'planificacion', producto: 'inventarios', cantidad: 'inventarios', anden: 'almacen', unidad: 'transporte', restriccion: 'seguridad' };
+  const REGLA = {
+    notas: [['bi-eye', 'Ves tus datos unos segundos y se ocultan'], ['bi-pencil-square', 'Escribes una nota de memoria, una sola vez'], ['bi-slash-circle', 'No se puede preguntar ni corregir']],
+    chat: [['bi-people', 'Todos ven lo que publican los demás'], ['bi-megaphone', 'El eco repite lo que entendió el Operativo'], ['bi-pencil', 'Si algo no coincide, se corrige a tiempo']],
+  };
+
+  /** Qué cambia en esta ronda (antes de empezar). */
+  function reglasRonda(r) {
+    const k = r.modo === 'notas' ? 'notas' : 'chat';
+    return tarjeta(['bi-signpost-split', k === 'notas' ? 'Así se juega esta ronda' : 'Ahora cambia la forma de comunicarse'],
+      el('ul', { class: 'list-unstyled mb-0' }, REGLA[k].map(([i, t]) => el('li', { class: 'd-flex align-items-center gap-2 mb-2' }, el('span', { class: 'tit-ic' }, ic(i)), el('span', {}, t)))));
+  }
+
+  /** Dónde falló cada pedido y qué enseña la ronda. */
+  function recorrido(res) {
+    const h = S.hechos || [];
+    const filas = h.map((x) => el('div', { class: 'd-flex align-items-center gap-2 py-2 border-bottom' },
+      el('span', { class: 'bola ' + (x.perfecto ? 'ok' : 'regular') }, ic(x.perfecto ? 'bi-check-lg' : 'bi-exclamation-lg')),
+      el('div', { class: 'flex-grow-1' }, el('div', { class: 'fw-semibold small' }, `Pedido ${x.n}`),
+        x.perfecto ? el('div', { class: 'small text-body-secondary' }, 'Todo llegó bien')
+          : el('div', {}, [...new Set(x.errores.map((c) => ROL_DE_CAMPO[c]))].map((rl) => el('span', { class: 'dato bad' }, icRol(rl), `${NOMBRE_ROL[rl]} · ${x.errores.filter((c) => ROL_DE_CAMPO[c] === rl).map((c) => S.campos[c].label).join(', ')}`)))),
+      el('span', { class: 'tabular fw-bold' }, `${x.puntos}/${S.maxPorPedido}`)));
+    const notas = res.modo === 'notas';
+    const leccion = notas ? 'Sin retorno, los errores se arrastran hasta el final.' : 'Con eco y correcciones, los errores se detectan antes de despachar.';
+    const antes = S.resumenes[S.resumenes.length - 2];
+    const dif = antes ? res.puntos - antes.puntos : null;
+    return tarjeta(['bi-diagram-3', 'Dónde se perdió información'], ...(filas.length ? filas : [el('p', { class: 'text-body-secondary mb-0' }, 'No se envió ningún pedido.')]),
+      el('div', { class: 'alert alert-info mt-3 mb-0 small' }, ic('bi-lightbulb', 'me-1'), leccion,
+        dif !== null ? el('div', { class: 'mt-1 fw-semibold' }, `${dif >= 0 ? '+' : ''}${dif} puntos frente a la ronda anterior`) : null,
+        el('div', { class: 'mt-1 opacity-75' }, 'Es una simulación con datos ficticios: no prueba una mejora real.')));
+  }
+
   const MISION = { planificacion: 'Sabes el destino y la hora.', inventarios: 'Sabes el producto y la cantidad.', almacen: 'Sabes en qué muelle se carga.', transporte: 'Sabes qué unidad va.', seguridad: 'Sabes la restricción de la carga.', operativo: 'Armas y envías el despacho.' };
   const PASOS = {
-    notas: [['bi-ui-checks', 'Marca tus datos'], ['bi-arrow-right-circle', 'Pásalos al siguiente'], ['bi-slash-circle', 'Sin preguntas']],
+    notas: [['bi-eye', 'Memoriza tus datos'], ['bi-pencil-square', 'Escribe tu nota'], ['bi-slash-circle', 'Una vez, sin preguntas']],
     chat: [['bi-person-vcard', 'Publica tu tarjeta'], ['bi-megaphone', 'Escucha el eco'], ['bi-pencil', 'Corrige si falla']],
   };
 
@@ -264,6 +297,7 @@
         el('h2', { class: 'h3 mb-1' }, misRoles.length > 1 ? misRoles.map((x) => NOMBRE_ROL[x]).join(' + ') : NOMBRE_ROL[rol]),
         el('p', { class: 'mb-0 opacity-75' }, misRoles.map((x) => MISION[x]).join(' ')))),
       tarjeta(null, cadenaVista(r, rol)),
+      reglasRonda(r),
       tarjeta(['bi-flag', `Ronda ${r.numero}`], el('div', { class: 'row g-2 text-center' }, PASOS[r.modo === 'notas' ? 'notas' : 'chat'].map(([i, t], n) =>
         el('div', { class: 'col-4' }, el('div', { class: 'paso-m' }, ic(i, 'fs-3'), el('div', { class: 'small fw-semibold mt-1' }, `${n + 1}. ${t}`)))))),
       b);
@@ -285,22 +319,40 @@
     nodos.push(marcador(r));
     nodos.push(cadenaVista(r, rol));
     const mis = (S.misCampos || []).filter((c) => c.rol === rol);
-    nodos.push(tarjeta(['bi-card-checklist', 'Tus datos'], mis.length ? el('div', {}, mis.map((c) => chip(c.campo, c.valor, 'lg'))) : el('p', { class: 'text-body-secondary mb-0' }, 'No sabes ningún dato. Dependes del equipo.')));
+    nodos.push(tarjetaDatos(r, mis));
     const clave = [r.numero, r.pedidoActual, rol, ultimoEcoId(), sigMensajes(r, rol), S.misCampos ? S.misCampos.map((c) => c.valor).join('|') : ''].join(':');
     if (clave !== claveAccion || !accionNodo) { accionNodo = construirAccion(r, rol); claveAccion = clave; }
     nodos.push(accionNodo);
     nodos.push(tarjeta(r.modo === 'notas' ? ['bi-envelope-paper', 'Notas'] : ['bi-chat-square-text', 'Mesa de coordinación'], el('div', { class: 'list-group list-group-flush' }, ...(S.mensajes || []).filter((m) => m.pedidoN === r.pedidoActual).slice(-10).reverse().map(filaMensaje))));
+    const foco = document.activeElement && document.activeElement.tagName === 'TEXTAREA' ? document.activeElement : null;
+    const sel = foco ? [foco.selectionStart, foco.selectionEnd] : null;
     $app.replaceChildren(...nodos);
+    if (foco && foco.isConnected) { foco.focus(); try { foco.setSelectionRange(sel[0], sel[1]); } catch { /* ignorar */ } }
+  }
+
+  /** Tus datos. En la ronda 1 se ven unos segundos y se ocultan: hay que escribirlos de memoria. */
+  const borrador = {};
+  let tVer = null;
+  function tarjetaDatos(r, mis) {
+    clearTimeout(tVer);
+    if (!mis.length) return tarjeta(['bi-card-checklist', 'Tus datos'], el('p', { class: 'text-body-secondary mb-0' }, 'No sabes ningún dato. Dependes del equipo.'));
+    if (r.modo !== 'notas') return tarjeta(['bi-card-checklist', 'Tus datos'], el('div', {}, mis.map((c) => chip(c.campo, c.valor, 'lg'))));
+    const total = (r.verSeg || 8) * 1000;
+    const resta = r.pedidoDesde + total - (Date.now() + offset);
+    if (resta <= 0) return tarjeta(['bi-eye-slash', 'Datos ocultos'], el('p', { class: 'text-body-secondary mb-0' }, 'Escríbelos de memoria en tu nota.'));
+    tVer = setTimeout(render, resta + 60);
+    return tarjeta(['bi-eye', 'Memoriza tus datos'], el('div', {}, mis.map((c) => chip(c.campo, c.valor, 'lg'))),
+      el('div', { class: 'ver-barra', 'aria-hidden': 'true' }, el('div', { class: 'ver-barra-i', style: `width:${Math.min(100, resta / total * 100)}%;animation-duration:${resta}ms` })));
   }
 
   function filaMensaje(m) {
     return el('div', { class: 'list-group-item px-0 d-flex flex-wrap align-items-center gap-1' }, icTipo(m.tipo), icRol(m.de), ic('bi-arrow-right', 'text-body-secondary'),
-      m.a === 'todos' ? ic('bi-people') : icRol(m.a), chipsDatos(m.datos, 't-' + m.tipo), m.texto ? el('span', { class: 'small' }, m.texto) : null);
+      m.a === 'todos' ? ic('bi-people') : icRol(m.a), m.tipo === 'nota' && m.texto ? null : chipsDatos(m.datos, 't-' + m.tipo), m.texto ? el('span', { class: 'small' }, m.texto) : null);
   }
   const ultimoEco = () => msgsPedido('eco').pop();
   const ultimoEcoId = () => (S.ronda && S.ronda.modo === 'chat' && ultimoEco() ? ultimoEco().id : '');
   function sigMensajes(r, rol) {
-    if (r.modo === 'notas') { const p = msgsPedido('nota', (m) => m.a === rol).pop(); return p ? p.id : ''; }
+    if (r.modo === 'notas') { const p = msgsPedido('nota', (m) => m.a === rol).pop(); return (p ? p.id : '') + '|' + (msgsPedido('nota', (m) => m.de === rol).length ? 1 : 0); }
     if (rol === 'operativo') return msgsPedido(null, (m) => m.datos && m.tipo !== 'eco').length;
     return msgsPedido('tarjeta', (m) => m.de === rol).length;
   }
@@ -312,26 +364,31 @@
   }
 
   function accionNota(r, rol) {
-    const i = ORDEN.indexOf(rol);
+    const i = ORDEN.indexOf(rol); const sig = ORDEN[i + 1];
     const previa = msgsPedido('nota', (m) => m.a === rol).pop();
-    const mis = (S.misCampos || []).filter((c) => c.rol === rol);
-    const conocidos = { ...(previa ? previa.datos || {} : {}) };
-    mis.forEach((c) => { conocidos[c.campo] = c.valor; });
-    const cajas = {}; const lista = el('div', { class: 'list-group mb-3' });
-    Object.keys(conocidos).forEach((c) => {
-      const cb = el('input', { type: 'checkbox', class: 'form-check-input fs-4 m-0', checked: true, id: 'k_' + c }); cajas[c] = cb;
-      lista.append(el('label', { class: 'list-group-item d-flex align-items-center gap-3', for: 'k_' + c }, cb, chip(c, conocidos[c], 'lg')));
-    });
-    const estado = el('div', { class: 'small text-body-secondary mt-2' }, enviadoLocal[`n${r.numero}:${r.pedidoActual}:${rol}`] ? 'Nota enviada. Puedes reenviarla.' : '');
+    const mia = msgsPedido('nota', (m) => m.de === rol).pop();
+    const recibido = previa
+      ? el('div', { class: 'mb-3' }, el('div', { class: 'small text-body-secondary mb-1' }, 'Te pasó ', rolBadge(ORDEN[i - 1])), el('div', { class: 'nota-papel' }, previa.texto || chipsDatos(previa.datos)))
+      : (i > 0 ? el('p', { class: 'text-body-secondary small' }, ic('bi-hourglass-split', 'me-1'), 'Aún no llega nada.') : null);
+    if (mia) {
+      return tarjeta(['bi-envelope-check', 'Tu nota'], recibido, el('div', { class: 'nota-papel enviada' }, mia.texto),
+        el('div', { class: 'small text-success mt-2' }, ic('bi-check-circle-fill', 'me-1'), `Enviada a ${NOMBRE_ROL[sig]}. Solo se envía una vez.`));
+    }
+    const k = `n${r.numero}:${r.pedidoActual}:${rol}`;
+    const max = 140;
+    const cuenta = el('div', { class: 'small text-body-secondary text-end mb-2' });
+    const ta = el('textarea', { class: 'form-control form-control-lg', rows: '4', maxlength: String(max), id: 'notaTxt', placeholder: 'Escribe tus datos y lo que te llegó', 'aria-label': 'Tu nota' });
+    ta.value = borrador[k] || '';
+    const pintar = () => { cuenta.textContent = `${ta.value.length}/${max}`; };
+    ta.addEventListener('input', () => { borrador[k] = ta.value; pintar(); }); pintar();
     const b = el('button', { type: 'button', class: 'btn btn-primary btn-lg w-100', onclick: () => {
-      const datos = {}; Object.keys(cajas).forEach((c) => { if (cajas[c].checked) datos[c] = conocidos[c]; });
-      if (!Object.keys(datos).length) return toast('Marca al menos un dato.');
-      enviarMsg({ como: rol, datos }); volar(rol, ORDEN[i + 1], 'nota'); F.sonar('envio'); F.vibrar(30);
-      enviadoLocal[`n${r.numero}:${r.pedidoActual}:${rol}`] = true; estado.textContent = 'Nota enviada.';
-    } }, ic('bi-envelope-arrow-up', 'me-2'), `Enviar a ${NOMBRE_ROL[ORDEN[i + 1]]}`);
-    return tarjeta(['bi-pencil-square', 'Tu nota'],
-      previa ? el('div', { class: 'mb-3' }, el('div', { class: 'small text-body-secondary mb-1' }, 'Te pasó ', rolBadge(ORDEN[i - 1])), chipsDatos(previa.datos)) : (i > 0 ? el('p', { class: 'text-body-secondary small' }, ic('bi-hourglass-split', 'me-1'), 'Aún no llega nada.') : null),
-      lista, b, estado);
+      const texto = ta.value.trim();
+      if (!texto) return toast('Escribe tu nota.');
+      b.disabled = true; setTimeout(() => { b.disabled = false; }, 1500);
+      enviarMsg({ como: rol, texto }); volar(rol, sig, 'nota'); F.sonar('envio'); F.vibrar(30);
+    } }, ic('bi-envelope-arrow-up', 'me-2'), `Enviar a ${NOMBRE_ROL[sig]}`);
+    return tarjeta(['bi-pencil-square', 'Escribe tu nota'], recibido, ta, cuenta, b,
+      el('div', { class: 'small text-body-secondary mt-2' }, ic('bi-info-circle', 'me-1'), 'Solo se envía una vez.'));
   }
 
   function selectorCampo(c, valor, dirtyKey) {
@@ -373,8 +430,7 @@
     const i = ORDEN.indexOf(rol);
     const form = el('div', {});
     let base = {};
-    if (esNotas) { const n = msgsPedido('nota', (m) => m.a === rol).pop(); base = n ? n.datos || {} : {}; }
-    else base = DX.valoresComunicados(S.mensajes || [], r.pedidoActual);
+    if (!esNotas) base = DX.valoresComunicados(S.mensajes || [], r.pedidoActual);
     const dk = `${r.numero}:${r.pedidoActual}`;
     DX.CAMPOS_ORDEN.forEach((c) => form.append(campoForm(c, selectorCampo(c, base[c], dk))));
     const acciones = [];
@@ -390,8 +446,9 @@
       if (Object.keys(datos).length < DX.CAMPOS_ORDEN.length) return toast('Completa los 7 datos antes de enviar.');
       net.enviar({ t: 'pedido', valores: datos }); F.sonar('envio'); F.vibrar(40);
     } }, ic('bi-send', 'me-2'), 'Enviar despacho'));
+    const notaIn = esNotas ? msgsPedido('nota', (m) => m.a === rol).pop() : null;
     const recibido = esNotas
-      ? (Object.keys(base).length ? el('div', { class: 'mb-3' }, el('div', { class: 'small text-body-secondary mb-1' }, 'Te pasó ', rolBadge(ORDEN[i - 1])), chipsDatos(base)) : el('p', { class: 'text-body-secondary small' }, ic('bi-hourglass-split', 'me-1'), 'Aún no llega nada.'))
+      ? (notaIn ? el('div', { class: 'mb-3' }, el('div', { class: 'small text-body-secondary mb-1' }, 'Te pasó ', rolBadge(ORDEN[i - 1])), el('div', { class: 'nota-papel' }, notaIn.texto || chipsDatos(notaIn.datos))) : el('p', { class: 'text-body-secondary small' }, ic('bi-hourglass-split', 'me-1'), 'Aún no llega nada.'))
       : el('p', { class: 'text-body-secondary small' }, 'Se rellena con las tarjetas del equipo.');
     return tarjeta(['bi-send-check', 'Arma el despacho'], recibido, form, ...acciones);
   }

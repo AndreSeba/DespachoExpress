@@ -56,3 +56,10 @@
   .confeti-capa,.splash{display:none}
   .estrella,.insignia{opacity:1;animation:none}
 }
+
+/* Ronda 1: datos que se ocultan y nota escrita a mano */
+.ver-barra { height: 6px; border-radius: 3px; background: var(--bs-secondary-bg); margin-top: .75rem; overflow: hidden; }
+.ver-barra-i { height: 100%; background: var(--bs-primary); animation: ver-corre linear forwards; }
+@keyframes ver-corre { to { width: 0; } }
+.nota-papel { background: var(--bs-warning-bg-subtle); border: 1px dashed var(--bs-warning-border-subtle); border-radius: .5rem; padding: .6rem .8rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.nota-papel.enviada { background: var(--bs-success-bg-subtle); border-color: var(--bs-success-border-subtle); }

@@ -20,7 +20,7 @@ const espera = (ms) => new Promise((r) => setTimeout(r, ms));
 const hctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
 const host = await hctx.newPage(); vigila(host, 'host');
 await host.goto(base + '/host');
-await host.waitForFunction(() => /^[A-Z]{4}$/.test(document.getElementById('codigo').textContent));
+await host.waitForFunction(() => /^[A-Z]{4}$/.test(document.getElementById('codigo')?.textContent || ''));
 const code = await host.locator('#codigo').textContent();
 console.log('sala', code);
 
@@ -49,6 +49,7 @@ console.log('rol de Camila:', rolJugador);
 if (/Operativo/.test(rolJugador)) { errores.push('Camila declaró Operativo y recibió Operativo'); }
 
 // ---- Camila juega como humano según su rol (ronda 1: pasa nota; operativo: arma despacho)
+let chateo = false;
 async function jugarHumano(modo) {
   const hasta = Date.now() + 70000; let acciones = 0;
   while (Date.now() < hasta) {
@@ -58,11 +59,15 @@ async function jugarHumano(modo) {
     const n = await sel.count();
     for (let i = 0; i < n; i++) { const s = sel.nth(i); if ((await s.inputValue()) === '') await s.selectOption({ index: 1 }); }
     const enviarNota = jug.locator('button:has-text("Enviar a")');
-    const tarjeta = jug.locator('button:has-text("Publicar mi tarjeta")');
+    const tarjeta = jug.locator('button:has-text("Publicar mi nota")');
     const despacho = jug.locator('button:has-text("Enviar despacho")');
     const eco = jug.locator('button:has-text("Leer el eco")');
-    if (await enviarNota.count() && (await jug.locator('input[type=checkbox]').count())) { await enviarNota.first().click(); acciones++; }
-    else if (await tarjeta.count()) { await tarjeta.first().click(); acciones++; await espera(500); }
+    if (await enviarNota.count() && (await jug.locator('#notaTxt').count())) { await jug.locator('#notaTxt').fill('Nido, 60 cajas, muelle 2, camion 3, 08:00'); await enviarNota.first().click(); acciones++; }
+    else if (await tarjeta.count()) {
+      await jug.locator('#notaTxt').fill('Mi dato es 08:00, Muelle 2 y Camion 3');
+      await tarjeta.first().click(); acciones++; await espera(500);
+      if (modo === 2 && !chateo) { chateo = true; await jug.locator('#chatTxt').fill('¿Alguien confirma el muelle?'); await jug.locator('#chatEnviar').click(); await espera(400); }
+    }
     else if (await despacho.count()) { if (modo === 2 && await eco.count()) { await eco.first().click(); await espera(300); } await despacho.first().click(); acciones++; }
     await espera(1200);
   }
@@ -85,6 +90,9 @@ await host.screenshot({ path: `${OUT}/panel-04-entre-rondas.png` });
 await host.click('[data-accion="iniciar"]');
 await jug.waitForSelector('#entendidoBtn');
 await host.waitForSelector('#preparando');
+await jug.waitForSelector('#avisoHablar');
+await espera(700);
+await jug.screenshot({ path: `${OUT}/jugador-02b-briefing-ronda2.png`, fullPage: true });
 await jug.click('#entendidoBtn');
 await host.waitForSelector('#ringTx');
 const j2 = jugarHumano(2);

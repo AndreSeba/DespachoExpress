@@ -12,7 +12,9 @@ const G = require('./lib/game');
 const { botTick } = require('./lib/bots');
 
 const PORT = parseInt(process.env.PORT, 10) || 3000;
-const PUBLIC = path.join(__dirname, 'public');
+// La interfaz nueva (React) se compila a dist/ con `pnpm build`. Si no existe, se sirve la versión anterior de public/.
+const DIST = path.join(__dirname, 'dist');
+const PUBLIC = fs.existsSync(path.join(DIST, 'index.html')) ? DIST : path.join(__dirname, 'public');
 const MAX_SALAS = 100;
 const SALA_INACTIVA_MS = 6 * 60 * 60 * 1000;
 

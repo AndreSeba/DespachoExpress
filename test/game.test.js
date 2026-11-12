@@ -279,3 +279,58 @@ test('hechos: el equipo ve el resultado de cada pedido enviado sin los valores r
   assert.equal(h[0].puntos, 6);
   assert.ok(!Object.values(h[0]).includes(real));
 });
+
+test('ronda 1: la nota escrita se envía una sola vez por pedido y reconoce los datos que menciona', () => {
+  const s = G.crearSala(new Map(), { pedidos: 2 });
+  const hs = ['A', 'B', 'C', 'D', 'E', 'F'].map((a) => G.unirse(s, a));
+  G.iniciarRonda(s);
+  const dueno = (rol) => hs.find((p) => p.roles.includes(rol));
+  const m = G.enviarMensaje(s, dueno('almacen').id, { texto: 'Camión 3, muelle 2 y 08:00' });
+  assert.equal(m.texto, 'Camión 3, muelle 2 y 08:00');
+  assert.deepEqual(m.datos, { anden: 'Muelle 2', unidad: 'Camión 3', horario: '08:00' });
+  assert.throws(() => G.enviarMensaje(s, dueno('almacen').id, { texto: 'otra vez' }), /una sola vez|Ya enviaste/);
+  const sinDatos = G.enviarMensaje(s, dueno('planificacion').id, { texto: 'no me acuerdo' });
+  assert.equal(sinDatos.datos, null);
+  const op = dueno('operativo');
+  G.enviarPedido(s, op.id, { ...s.actual.pedidos[0].real });
+  assert.doesNotThrow(() => G.enviarMensaje(s, dueno('almacen').id, { texto: 'pedido nuevo' }));
+});
+
+test('ronda 1: el estado trae cuándo empezó el pedido y cuántos segundos se ven los datos', () => {
+  const s = G.crearSala(new Map(), { pedidos: 2 });
+  const hs = ['A', 'B', 'C', 'D', 'E', 'F'].map((a) => G.unirse(s, a));
+  G.iniciarRonda(s);
+  const snap = G.snapshot(s, { tipo: 'jugador', jugadorId: hs[0].id });
+  assert.equal(snap.ronda.verSeg, G.VER_SEG);
+  assert.ok(snap.ronda.pedidoDesde > 0);
+});
+
+test('ruta: el estado dice qué eslabones ya comunicaron en el pedido actual', () => {
+  const s = G.crearSala(new Map(), { pedidos: 2 });
+  const hs = ['A', 'B', 'C', 'D', 'E', 'F'].map((a) => G.unirse(s, a));
+  G.iniciarRonda(s);
+  const dueno = (rol) => hs.find((p) => p.roles.includes(rol));
+  const ver = () => G.snapshot(s, { tipo: 'jugador', jugadorId: hs[0].id }).ronda.progreso;
+  assert.deepEqual(ver(), []);
+  G.enviarMensaje(s, dueno('planificacion').id, { texto: 'Cliente La Paz a las 08:00' });
+  G.enviarMensaje(s, dueno('inventarios').id, { texto: 'Nido 60' });
+  assert.deepEqual(ver(), ['planificacion', 'inventarios']);
+  G.enviarPedido(s, dueno('operativo').id, { ...s.actual.pedidos[0].real });
+  assert.deepEqual(ver(), []);
+});
+
+test('ronda 2: se puede hablar directo, las notas son de todos y los mensajes directos son privados', () => {
+  const s = G.crearSala(new Map(), { pedidos: 2 });
+  const hs = ['A', 'B', 'C', 'D', 'E', 'F'].map((a) => G.unirse(s, a));
+  G.iniciarRonda(s); G.cerrarRonda(s, 'manual'); G.iniciarRonda(s);
+  assert.equal(s.actual.modo, 'chat');
+  const dueno = (rol) => hs.find((p) => p.roles.includes(rol));
+  const nota = G.enviarMensaje(s, dueno('almacen').id, { a: 'todos', tipo: 'tarjeta', texto: 'Mi muelle es Muelle 3' });
+  assert.deepEqual(nota.datos, { anden: 'Muelle 3' });
+  G.enviarMensaje(s, dueno('almacen').id, { a: 'todos', tipo: 'tarjeta', texto: 'Mejor Muelle 2' });
+  G.enviarMensaje(s, dueno('transporte').id, { a: 'seguridad', tipo: 'msg', texto: 'Oye, ¿qué restricción tiene?' });
+  const ve = (rol) => G.snapshot(s, { tipo: 'jugador', jugadorId: dueno(rol).id }).mensajes.map((m) => m.texto);
+  assert.ok(ve('inventarios').includes('Mejor Muelle 2'), 'la nota de todos la ve cualquiera');
+  assert.ok(ve('seguridad').includes('Oye, ¿qué restricción tiene?'), 'el destinatario ve el mensaje directo');
+  assert.ok(!ve('inventarios').includes('Oye, ¿qué restricción tiene?'), 'un tercero no ve el mensaje directo');
+});
