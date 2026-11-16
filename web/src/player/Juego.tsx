@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { CAMPOS_ORDEN, ICON_CAMPO, NOMBRE_ROL, ORDEN } from '../lib/constants';
 import { fx } from '../lib/fx';
 import { Dato, Ic, IcRol, IcTipo, Tarjeta, cx, toast, useAhora, colorRol } from '../lib/ui';
-import { Cadena, DatosDe, FilaMensaje, RolBadge, msgsPedido, rachaAhora, volar, type Ctx } from './util';
+import { AvisoRonda, Cadena, DatosDe, FilaMensaje, RolBadge, msgsPedido, rachaAhora, volar, type Ctx } from './util';
 import type { EstadoJugador } from '../lib/types';
 import { useRuta } from '../lib/Camion';
 
@@ -108,7 +108,7 @@ function AccionNota({ c, borradores }: { c: Ctx; borradores: React.MutableRefObj
   );
 }
 
-/* ---------- Ronda 2: nota para todos, eco y corrección ---------- */
+/* ---------- Ronda 2: nota para todos, repetir y confirmar, y corrección ---------- */
 function AccionNotaChat({ c, borradores }: { c: Ctx; borradores: React.MutableRefObject<Record<string, string>> }) {
   const { S, rol } = c; const r = S.ronda!;
   const mis = (S.misCampos || []).filter((x) => x.rol === rol);
@@ -133,7 +133,7 @@ function AccionNotaChat({ c, borradores }: { c: Ctx; borradores: React.MutableRe
       <div className="muted mt-3 flex items-center gap-1.5 text-xs"><Ic n="bi-info-circle" />Todos pueden ver tu nota. Puedes actualizarla cuando quieras.</div>
       {eco && mis.length > 0 && (
         <div className="mt-4 rounded-2xl border border-[color-mix(in_oklab,#7C4DBA_45%,var(--line))] bg-[color-mix(in_oklab,#7C4DBA_10%,var(--surface))] p-3">
-          <div className="mb-1 flex items-center gap-1.5 font-extrabold" style={{ color: '#7C4DBA' }}><IcTipo tipo="eco" />Eco del Operativo</div>
+          <div className="mb-1 flex items-center gap-1.5 font-extrabold" style={{ color: '#7C4DBA' }}><IcTipo tipo="eco" />El Operativo repite y confirma</div>
           {mis.map((x) => {
             const visto = eco.datos ? eco.datos[x.campo] : undefined; const bien = visto === x.valor;
             return (
@@ -228,7 +228,7 @@ function AccionOperativo({ c, esNotas }: { c: Ctx; esNotas: boolean }) {
   const datos = () => { const o: Record<string, string> = {}; CAMPOS_ORDEN.forEach((k) => { if (valor(k)) o[k] = valor(k); }); return o; };
   const notaIn = esNotas ? msgsPedido(S, 'nota', (m) => m.a === rol).pop() : null;
   const leerEco = () => {
-    const d = datos(); if (!Object.keys(d).length) return toast('Completa algún dato para leer el eco.');
+    const d = datos(); if (!Object.keys(d).length) return toast('Completa algún dato para repetir y confirmar.');
     c.enviarMsg({ como: rol, tipo: 'eco', datos: d });
     ORDEN.filter((x) => x !== rol).forEach((x, k) => volar(rol, x, 'eco', k * 110)); fx.sonar('envio'); fx.vibrar(30);
   };
@@ -245,7 +245,7 @@ function AccionOperativo({ c, esNotas }: { c: Ctx; esNotas: boolean }) {
       ) : <p className="muted mb-3 flex items-center gap-1.5 text-sm"><Ic n="bi-hourglass-split" />Aún no llega nada.</p>)
         : <p className="muted mb-3 text-sm">Se rellena con las tarjetas del equipo.</p>}
       {CAMPOS_ORDEN.map((k) => <Selector key={k} S={S} campo={k} valor={valor(k)} onCambio={(v) => setDirty((o) => ({ ...o, [k]: v }))} />)}
-      {!esNotas && <button type="button" className="btn btn-ghost btn-lg btn-block mb-2" onClick={leerEco}><IcTipo tipo="eco" />Leer el eco en voz alta</button>}
+      {!esNotas && <button type="button" className="btn btn-ghost btn-lg btn-block mb-2" onClick={leerEco}><IcTipo tipo="eco" />Repetir y confirmar en voz alta</button>}
       <button type="button" className="btn btn-primary btn-lg btn-block" onClick={despachar}><Ic n="bi-send" />Enviar despacho</button>
     </Tarjeta>
   );
@@ -255,7 +255,6 @@ function AccionOperativo({ c, esNotas }: { c: Ctx; esNotas: boolean }) {
 export function Juego({ c, offset, borradores }: { c: Ctx; offset: number; borradores: React.MutableRefObject<Record<string, string>> }) {
   const { S, rol, roles } = c; const r = S.ronda!;
   const ruta = useRuta(r.numero, (S.hechos || []).length, r.progreso);
-  const [avisoCharla, setAvisoCharla] = useState(true);
   const alertas = (S.alertas || []).filter((a) => a.pedidoN === r.pedidoActual);
   const tablero = alertas.map((a) => (
     <div key={a.id} data-alerta className="rounded-2xl border-2 border-warn bg-[color-mix(in_oklab,#f5a524_16%,var(--surface))] p-4 shadow-lg">
@@ -283,14 +282,7 @@ export function Juego({ c, offset, borradores }: { c: Ctx; offset: number; borra
   return (
     <div className="space-y-3">
       {tablero}
-      {!notas && avisoCharla && (
-        <motion.section initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex items-center gap-3 rounded-2xl border-2 border-brand-400 bg-[color-mix(in_oklab,var(--color-brand-500)_9%,var(--surface))] p-3" id="avisoHablar">
-          <Ic n="bi-chat-dots-fill" className="text-2xl text-brand-500" />
-          <div className="min-w-0 flex-1 text-sm"><b>Ahora sí pueden hablar.</b> Pregunten y confirmen entre ustedes, con todos o con una sola persona.</div>
-          <button type="button" className="btn btn-primary btn-sm" onClick={() => document.getElementById('conversacion')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}>Ir al chat</button>
-          <button type="button" className="btn btn-ghost btn-sm" aria-label="Cerrar aviso" onClick={() => setAvisoCharla(false)}><Ic n="bi-x-lg" /></button>
-        </motion.section>
-      )}
+      <AvisoRonda modo={r.modo} compacto onChat={() => document.getElementById('conversacion')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} />
       {roles.length > 1 && (
         <div className="panel flex gap-1 p-1.5" role="group" aria-label="Tus roles">
           {roles.map((x) => (

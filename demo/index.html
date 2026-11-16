@@ -217,12 +217,12 @@ async function intro(){
     lista.append(b);
   });
   pantalla(
-    el('div',{class:'hero'}, el('h1',{},'Despacho Express'), el('p',{},'Un juego de 2 rondas para ver cómo se pierde la información entre compañeros y cómo mejorarlo con una tarjeta de traspaso y el eco.')),
+    el('div',{class:'hero'}, el('h1',{},'Despacho Express'), el('p',{},'Un juego de 2 rondas para ver cómo se pierde la información entre compañeros y cómo mejorarlo con una tarjeta de traspaso y repetir y confirmar.')),
     el('section',{class:'card'}, el('h3',{},'¿Cómo funciona?'),
       el('ol',{class:'steps'},
         el('li',{},'Cada compañero conoce solo una parte de un pedido de despacho.'),
         el('li',{},[el('b',{},'Ronda 1: '),'solo se pasan notas hacia adelante, sin poder preguntar.']),
-        el('li',{},[el('b',{},'Ronda 2: '),'se usa la tarjeta de traspaso y el eco (repetir lo entendido).']),
+        el('li',{},[el('b',{},'Ronda 2: '),'se usa la tarjeta de traspaso y repetir y confirmar (repetir lo entendido).']),
         el('li',{},'Al final se comparan las dos rondas.')),
       el('p',{class:'small muted'},'Tus compañeros son simulados. La partida dura unos 5 minutos.')),
     el('h2',{},'Elige tu rol'), lista, el('div',{style:'height:10px'}), go);
@@ -237,7 +237,7 @@ async function briefing(ronda){
        el('li',{},'No puedes preguntar ni recibir respuestas.'),
        el('li',{},'El Operativo arma el despacho con lo que le llegue.')]
     : [el('li',{},'Cada eslabón publica una tarjeta de traspaso: qué, cuándo y riesgo.'),
-       el('li',{},'El Operativo repite el despacho en voz alta (eco).'),
+       el('li',{},'El Operativo repite y confirma el despacho en voz alta.'),
        el('li',{},'Cada dueño del dato corrige lo que esté mal antes de enviar.')];
   const b = promesaBoton(ronda===1 ? 'Empezar ronda 1' : 'Empezar ronda 2');
   pantalla(el('section',{class:'card'}, el('span',{class:'badge'},'Ronda '+ronda+' de 2'),
@@ -366,7 +366,7 @@ async function turnoR2(ronda, ped, idx){
   }
   ROLES.forEach((r,i) => { if(i!==E.rol && r.id!=='operativo') log(r.nombre + ' publicó: ' + textoCampos(tarjetas[i]) + '.'); });
 
-  // 3) Operativo compila y hace eco
+  // 3) Operativo compila y repite y confirma
   const compilado = {};
   CAMPO_IDS.forEach(c => compilado[c] = tarjetas[DUENO[c]][c]);
   let enviado;
@@ -374,12 +374,12 @@ async function turnoR2(ronda, ped, idx){
   if(ROLES[E.rol].id === 'operativo'){
     const form = el('div',{});
     CAMPO_IDS.forEach(c => form.append(el('label',{class:'field'}, el('span',{},CAMPOS[c].label + ' (de ' + nombreRol(DUENO[c]) + ')'), selectCampo(c, compilado[c]))));
-    const eco = promesaBoton('Leer el eco en voz alta');
+    const eco = promesaBoton('Repetir y confirmar en voz alta');
     const enviar = promesaBoton('Enviar despacho');
     pantalla(avisoIncidente(ped), el('section',{class:'card'}, el('h3',{},'Arma el despacho con las tarjetas'),
-      el('p',{class:'small muted'},'Antes de enviar, lee el eco: cada dueño del dato puede corregirte.'), form), eco, el('div',{style:'height:8px'}), feed);
+      el('p',{class:'small muted'},'Antes de enviar, repite y confirma: cada dueño del dato puede corregirte.'), form), eco, el('div',{style:'height:8px'}), feed);
     await esperar(eco);
-    log('Eco del Operativo: ' + textoCampos(leerSelects(form)));
+    log('El Operativo repite y confirma: ' + textoCampos(leerSelects(form)));
     const actual = leerSelects(form);
     for(const c of CAMPO_IDS){
       if((actual[c]||compilado[c]) !== ped.real[c] && rng() < 0.8){
@@ -389,14 +389,14 @@ async function turnoR2(ronda, ped, idx){
       }
     }
     await sleep(300);
-    pantalla(avisoIncidente(ped), el('section',{class:'card'}, el('h3',{},'Despacho tras el eco'), form), el('div',{class:'card'}, el('b',{},correcciones.length), ' corrección(es) por eco.'), enviar, feed);
+    pantalla(avisoIncidente(ped), el('section',{class:'card'}, el('h3',{},'Despacho tras repetir y confirmar'), form), el('div',{class:'card'}, el('b',{},correcciones.length), ' corrección(es) al repetir y confirmar.'), enviar, feed);
     await esperar(enviar);
     enviado = {}; const fin = leerSelects(form);
     CAMPO_IDS.forEach(c => { enviado[c] = fin[c] || compilado[c]; });
   } else {
     // Eco: el Operativo (bot) lee el despacho; el jugador revisa sus datos
     const mis = ROLES[E.rol].campos;
-    log('Eco del Operativo: ' + textoCampos(compilado));
+    log('El Operativo repite y confirma: ' + textoCampos(compilado));
     const decisiones = {};
     const lista = el('div',{});
     mis.forEach(c => {
@@ -407,8 +407,8 @@ async function turnoR2(ronda, ped, idx){
         el('label',{class:'check',for:'ok_'+c}, bien, el('div',{},'Está bien')),
         el('label',{class:'check',for:'mal_'+c}, mal, el('div',{},'Está mal: lo corrijo (es ' + ped.real[c] + ')'))));
     });
-    const b = promesaBoton('Confirmar el eco');
-    pantalla(avisoIncidente(ped), el('section',{class:'card'}, el('h3',{},'El Operativo repite el despacho (eco)'),
+    const b = promesaBoton('Confirmar');
+    pantalla(avisoIncidente(ped), el('section',{class:'card'}, el('h3',{},'El Operativo repite y confirma el despacho'),
       el('div',{class:'note'}, textoCampos(compilado)), el('p',{class:'small muted'},'Revisa tus datos. Si algo está mal, este es el momento de corregirlo.')), lista, b, feed);
     await esperar(b);
     const final = {...compilado};
@@ -440,7 +440,7 @@ async function mostrarResultado(ronda, ped, r, res){
     el('div',{}, el('b',{},CAMPOS[c].label), el('div',{class:'small muted'},'Real: ' + ped.real[c])),
     el('div',{class:'v'}, res.ok[c] ? el('span',{class:'badge ok'},'Correcto: '+r.enviado[c]) : el('span',{class:'badge bad'},'Incorrecto: '+r.enviado[c]), el('div',{class:'small muted'}, res.ok[c] ? '' : explicarPerdida(c, r.trace).replace(/^ · /,'')))));
   const extra = ronda===2 && r.correcciones.length
-    ? el('div',{class:'card'}, el('h3',{},'El eco corrigió'), ...r.correcciones.map(x => el('p',{class:'small'}, `${CAMPOS[x.campo].label}: ${x.de} > ${x.a} (${x.por})`)))
+    ? el('div',{class:'card'}, el('h3',{},'Repetir y confirmar corrigió'), ...r.correcciones.map(x => el('p',{class:'small'}, `${CAMPOS[x.campo].label}: ${x.de} > ${x.a} (${x.por})`)))
     : null;
   const ultimo = ped.n === PEDIDOS_POR_RONDA;
   const b = promesaBoton(ultimo ? 'Ver resumen de la ronda' : 'Siguiente pedido');
@@ -464,11 +464,11 @@ async function entreRondas(){
     el('section',{class:'card'}, el('span',{class:'badge'},'Ronda 1 terminada'), el('h2',{},`${s.puntos} de ${s.max} puntos`),
       el('p',{class:'muted'}, `${s.perfectos} despacho(s) perfecto(s) · ${s.errores} dato(s) errado(s) · ${s.perdidas} dato(s) se perdieron, cambiaron o se adivinaron en la cadena.`),
       el('div',{class:'bar'}, el('i',{style:`width:${s.puntos/s.max*100}%`}))),
-    el('section',{class:'card'}, el('h2',{},'Rediseño: tarjeta de traspaso y eco'),
+    el('section',{class:'card'}, el('h2',{},'Rediseño: tarjeta de traspaso y repetir y confirmar'),
       el('p',{},'En la ronda 1 nadie pudo preguntar ni confirmar. Para la ronda 2 el grupo acuerda dos herramientas:'),
       el('ol',{class:'steps'},
         el('li',{},[el('b',{},'Tarjeta de traspaso: '),'QUÉ dato · CUÁNDO · QUIÉN · RIESGO · CONFIRMACIÓN.']),
-        el('li',{},[el('b',{},'Regla del eco: '),'quien recibe repite lo que entendió antes de seguir.'])),
+        el('li',{},[el('b',{},'Regla de repetir y confirmar: '),'quien recibe repite lo que entendió antes de seguir.'])),
       el('p',{class:'small muted'},'Son propuestas de diseño del equipo; esta demo solo muestra cómo podrían funcionar.')), b);
   await esperar(b);
 }
@@ -482,7 +482,7 @@ async function final(){
   cabecera('Resultado final', 100);
   const fila = (n, x, y, fmt) => el('tr',{}, el('td',{},n), el('td',{class:'num'},fmt?fmt(x):x), el('td',{class:'num'},fmt?fmt(y):y));
   const mejora = b.puntos - a.puntos;
-  const msg = mejora > 0 ? `En la ronda 2 sumaste ${mejora} punto(s) más. Con tarjeta y eco, menos datos se perdieron.`
+  const msg = mejora > 0 ? `En la ronda 2 sumaste ${mejora} punto(s) más. Con tarjeta y repetir y confirmar, menos datos se perdieron.`
     : mejora === 0 ? 'Las dos rondas dieron el mismo puntaje. Revisa en qué pedidos aparecieron los errores.'
     : 'Esta vez la ronda 2 no mejoró. Con un solo intento el azar pesa mucho: lo importante es ver dónde apareció cada error.';
   const copiar = promesaBoton('Copiar la tarjeta de traspaso', {ghost:true});
@@ -498,18 +498,18 @@ async function final(){
           fila('Despachos perfectos', a.perfectos, b.perfectos, v=>v+' / '+PEDIDOS_POR_RONDA),
           fila('Datos errados', a.errores, b.errores),
           fila('Datos perdidos en la cadena', a.perdidas, b.perdidas),
-          fila('Correcciones por eco', '—', b.correcciones))),
+          fila('Correcciones al repetir y confirmar', '—', b.correcciones))),
       el('div',{style:'margin-top:10px'}, el('div',{class:'small muted'},'Ronda 1'), el('div',{class:'bar'}, el('i',{style:`width:${a.puntos/a.max*100}%`})),
         el('div',{class:'small muted',style:'margin-top:6px'},'Ronda 2'), el('div',{class:'bar r2'}, el('i',{style:`width:${b.puntos/b.max*100}%`}))),
       el('p',{style:'margin-top:10px'}, msg),
       el('p',{class:'small muted'},'Los porcentajes de error de los compañeros simulados son parámetros de la demo, no datos reales. Una sola partida no demuestra nada: sirve para vivir la dinámica.')),
     el('section',{class:'card'}, el('h2',{},'Qué te llevas'),
       el('ul',{}, el('li',{},'Un dato que pasa por varias manos se pierde o se deforma si nadie puede confirmarlo.'),
-        el('li',{},'La tarjeta de traspaso ordena qué se dice; el eco comprueba que se entendió.'),
+        el('li',{},'La tarjeta de traspaso ordena qué se dice; repetir y confirmar comprueba que se entendió.'),
         el('li',{},'Avisar un cambio a tiempo es parte del trabajo de quien conoce el dato.')),
       pre, copiar),
     el('section',{class:'card'}, el('h3',{},'Preguntas para conversar'),
-      el('ul',{}, el('li',{},'¿Dónde se perdió más información?'), el('li',{},'¿Qué cambió cuando hubo tarjeta y eco?'), el('li',{},'¿Qué voy a hacer distinto esta semana?'))),
+      el('ul',{}, el('li',{},'¿Dónde se perdió más información?'), el('li',{},'¿Qué cambió cuando hubo tarjeta y repetir y confirmar?'), el('li',{},'¿Qué voy a hacer distinto esta semana?'))),
     otra, el('div',{style:'height:8px'}), mismo);
   const r = await Promise.race([esperar(otra).then(()=> 'otra'), esperar(mismo).then(()=> 'mismo')]);
   return r;

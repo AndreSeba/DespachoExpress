@@ -136,7 +136,7 @@ export function Cadena({ S, selPedido, abrirDrawer }: Props) {
         </div>
       </div>
       <div className="muted mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold">
-        {(['nota', 'tarjeta', 'eco', 'correccion'] as const).map((t) => <span key={t}><IcTipo tipo={t} className="mr-1" />{t === 'correccion' ? 'corrección' : t}</span>)}
+        {(['nota', 'tarjeta', 'eco', 'correccion'] as const).map((t) => <span key={t}><IcTipo tipo={t} className="mr-1" />{t === 'correccion' ? 'corrección' : t === 'eco' ? 'repetir y confirmar' : t}</span>)}
       </div>
     </Tarjeta>
   );

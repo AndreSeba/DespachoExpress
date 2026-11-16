@@ -65,6 +65,25 @@ export function FilaMensaje({ m }: { m: Mensaje }) {
   );
 }
 
+/** Aviso fijo de cómo se comunica cada ronda. Grande en la pantalla de rol, compacto durante el juego. */
+export function AvisoRonda({ modo, compacto, onChat }: { modo: 'notas' | 'chat'; compacto?: boolean; onChat?: () => void }) {
+  const silencio = modo === 'notas';
+  const icono = silencio ? 'bi-volume-mute-fill' : 'bi-megaphone-fill';
+  const texto = silencio ? 'En silencio: no se puede hablar, preguntar ni corregir.' : 'Ahora sí: habla en voz alta o escribe. Usa todos los medios.';
+  const tono = silencio
+    ? 'border-warn bg-[color-mix(in_oklab,var(--color-warn)_14%,var(--surface))]'
+    : 'border-ok bg-[color-mix(in_oklab,var(--color-ok)_11%,var(--surface))]';
+  const colorIc = silencio ? 'bg-warn text-[#4a2f00]' : 'bg-ok text-white';
+  return (
+    <motion.section id={silencio ? 'avisoSilencio' : 'avisoHablar'} role="note" initial={{ y: -8, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+      className={cx('flex items-center gap-3 rounded-2xl border-2', tono, compacto ? 'px-3 py-2' : 'p-4')}>
+      <span className={cx('grid shrink-0 place-items-center rounded-xl shadow', colorIc, compacto ? 'size-8 text-base' : 'size-12 text-2xl')}><Ic n={icono} /></span>
+      <div className={cx('min-w-0 flex-1 font-bold leading-snug', compacto ? 'text-xs' : 'text-base')}>{texto}</div>
+      {compacto && !silencio && onChat && <button type="button" className="btn btn-primary btn-sm shrink-0" onClick={onChat}>Ir al chat</button>}
+    </motion.section>
+  );
+}
+
 export function Paso({ icono, texto, n }: { icono: string; texto: string; n: number }) {
   return (
     <div className="panel-soft flex flex-col items-center gap-1 p-3 text-center">

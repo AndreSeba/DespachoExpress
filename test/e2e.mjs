@@ -63,7 +63,7 @@ async function jugarHumano(modo) {
     const enviarNota = jug.locator('button:has-text("Enviar a")');
     const tarjeta = jug.locator('button:has-text("Publicar mi nota")');
     const despacho = jug.locator('button:has-text("Enviar despacho")');
-    const eco = jug.locator('button:has-text("Leer el eco")');
+    const eco = jug.locator('button:has-text("Repetir y confirmar")');
     if (await enviarNota.count() && (await jug.locator('#notaTxt').count())) { await jug.locator('#notaTxt').fill('Nido, 60 cajas, muelle 2, camion 3, 08:00'); await enviarNota.first().click(); acciones++; }
     else if (await tarjeta.count()) {
       await jug.locator('#notaTxt').fill('Mi dato es 08:00, Muelle 2 y Camion 3');

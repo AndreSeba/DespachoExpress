@@ -7,10 +7,10 @@ Juego cooperativo para practicar la comunicación **entre compañeros** en una c
 - **Problema que ataca:** la comunicación entre compañeros no es fluida (hallazgo preliminar del equipo).
 - **Duración:** 30 minutos, 2 rondas.
  1. **Ronda 1, solo hacia adelante:** cada uno ve sus datos 8 segundos y se ocultan; escribe de memoria una nota al siguiente (una sola vez por pedido), sin poder preguntar.
- 2. **Ronda 2, conversar y confirmar:** los datos también se ven unos segundos; cada uno publica una nota que todos ven, puede hablar directo con alguien o con todos, y el *eco* (repetir lo entendido) permite corregir.
-- **Qué se llevan:** la tarjeta de traspaso, la regla del eco y un compromiso personal.
-- **Qué mide:** puntos, datos errados, mensajes y correcciones por eco, ronda contra ronda.
-- **Límites:** simulación con pocas personas y sin grupo de comparación. La tarjeta y el eco son propuestas de diseño del equipo; los casos son ficticios.
+ 2. **Ronda 2, conversar y confirmar:** los datos también se ven unos segundos; cada uno publica una nota que todos ven, puede hablar directo con alguien o con todos, y el Operativo *repite y confirma* lo entendido para que cada dueño corrija.
+- **Qué se llevan:** la tarjeta de traspaso, la regla de repetir y confirmar y un compromiso personal.
+- **Qué mide:** puntos, datos errados, mensajes y correcciones al repetir y confirmar, ronda contra ronda.
+- **Límites:** simulación con pocas personas y sin grupo de comparación. La tarjeta y repetir y confirmar son propuestas de diseño del equipo; los casos son ficticios.
 
 ## Tres formas de usarlo
 | Forma | Qué es | Cómo |
@@ -23,7 +23,7 @@ Juego cooperativo para practicar la comunicación **entre compañeros** en una c
 Pensado para mirar y tocar, con poco texto:
 - **Código de sala** grande; al tocarlo se copia el enlace para los jugadores.
 - **Equipo:** 6 tarjetas de rol con el apodo, si es persona o bot, y si está conectado. Tocar un rol abre su historial.
-- **Recorrido en vivo:** la cadena de 6 eslabones con paquetes que viajan cuando alguien envía una nota (), tarjeta (), eco () o corrección (). Cada eslabón muestra su dato en verde (correcto), amarillo (desactualizado) o rojo (errado). Los incidentes destellan en el dueño del dato.
+- **Recorrido en vivo:** la cadena de 6 eslabones con paquetes que viajan cuando alguien envía una nota (), tarjeta (), repetir y confirmar () o corrección (). Cada eslabón muestra su dato en verde (correcto), amarillo (desactualizado) o rojo (errado). Los incidentes destellan en el dueño del dato.
 - **Reloj, ronda y pedidos:** anillo de tiempo, puntos y un círculo por pedido (verde si es perfecto, naranja si tiene errores, pulsando el actual). Tocar un círculo inspecciona ese pedido.
 - **Recorrido de cada dato:** cuadrícula de 7 datos por 6 eslabones y el envío final; / / ↺ para ver dónde se perdió o cambió cada dato.
 - **Actividad:** línea de tiempo con iconos.
@@ -34,7 +34,7 @@ Pensado para mirar y tocar, con poco texto:
 ## Para que sea divertido (jugadores)
 - **Resultado al instante:** cada pedido enviado avisa a todo el equipo con sus puntos, la racha de pedidos perfectos y qué dato falló (sin revelar el valor real).
 - **Marcador vivo:** un círculo por pedido, racha y puntos.
-- **Paquetes que vuelan** entre eslabones cuando alguien envía una nota, tarjeta o eco.
+- **Paquetes que vuelan** entre eslabones cuando alguien envía una nota, tarjeta o al repetir y confirmar.
 - **Reloj con urgencia:** barra de tiempo y latido en el último minuto.
 - **Camión que sigue el recorrido:** en el celular y en el panel, un camión avanza por la ruta a medida que cada eslabón comunica su dato, llega a la meta al enviarse el despacho y sale de nuevo en el pedido siguiente. También sirve de pantalla de carga: avanza con cada persona que entra a la sala y con cada una que toca "Listo". Al tocarlo suena la bocina.
 - **Cuenta de arranque, confeti y vibración** en el celular. El sonido está apagado por defecto (botón de altavoz arriba).
@@ -50,7 +50,7 @@ Al terminar el juego, cada participante responde desde su celular 8 afirmaciones
 1. Abren el enlace o escriben el código de 4 letras y un apodo (no el nombre real).
 2. Reciben un rol y solo ven su parte del pedido.
 3. **Ronda 1:** memorizan sus datos (8 segundos), escriben una nota al siguiente eslabón y la envían una sola vez. El operativo lee la nota y arma el despacho.
-4. **Ronda 2:** memorizan sus datos (8 segundos), publican su nota (la ven todos), conversan por mensajes directos o para todos, y el operativo lee el eco para que cada dueño corrija lo que esté mal.
+4. **Ronda 2:** memorizan sus datos (8 segundos), publican su nota (la ven todos), conversan por mensajes directos o para todos, y el operativo repite y confirma para que cada dueño corrija lo que esté mal.
 - Con menos de 6 personas, cada una toma varios roles; las que sobran entran como observadoras.
 
 ## Despliegue

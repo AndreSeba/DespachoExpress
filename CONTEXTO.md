@@ -45,7 +45,7 @@ Con menos de 6 personas, cada una toma varios roles; las que sobran son observad
 
 **Ronda 1, solo hacia adelante:** cada uno ve sus datos 8 segundos y se ocultan; escribe de memoria una nota al siguiente eslabón, **una sola vez por pedido**. No se puede preguntar ni corregir. El Operativo lee la nota que le llega y rellena los 7 datos a mano.
 
-**Ronda 2, conversar y confirmar:** los datos también se ocultan a los 8 segundos. Cada uno publica una nota que **ven todos** (hay un tablero "Notas de todos"), puede **hablar directo** con una persona o con todos, y el Operativo lee el **eco** (repite lo entendido) para que cada dueño corrija.
+**Ronda 2, conversar y confirmar:** los datos también se ocultan a los 8 segundos. Cada uno publica una nota que **ven todos** (hay un tablero "Notas de todos"), puede **hablar directo** con una persona o con todos, y el Operativo **repite y confirma** (en el código sigue llamándose `eco`) para que cada dueño corrija.
 
 **Puntaje:** cada dato correcto suma 1; si los 7 están bien, bonus de 3 (máximo 10 por pedido). Por defecto 4 pedidos por ronda y 7 minutos, ajustable en el panel.
 

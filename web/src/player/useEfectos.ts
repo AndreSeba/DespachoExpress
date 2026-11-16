@@ -14,7 +14,7 @@ export function useEfectos(S: EstadoJugador | null, rol: string | null, onPedido
     if (!S || !r) { p.est = ''; return; }
     const h = S.hechos || [];
     const clave = `${r.numero}:${r.estado}`;
-    const arranque = () => { if (r.modo === 'chat') fx.splash('Ahora pueden hablar', 'bi-chat-dots-fill'); else fx.splash('A despachar'); fx.sonar('arranque'); fx.vibrar([60, 40, 60]); };
+    const arranque = () => { if (r.modo === 'chat') fx.splash('Ahora sí: habla o escribe', 'bi-megaphone-fill'); else fx.splash('A despachar'); fx.sonar('arranque'); fx.vibrar([60, 40, 60]); };
     if (!p.listo || p.num !== r.numero) {
       const primera = !p.listo;
       p.listo = true; p.num = r.numero; p.hechos[r.numero] = h.length;

@@ -36,9 +36,9 @@ Con menos de 6 personas, cada una toma varios roles. Las que sobran entran como 
 | Ronda | Modo | Qué cambia |
 |---|---|---|
 | 1 | Solo hacia adelante | Cada uno ve sus datos 8 segundos y se ocultan. Escribe de memoria una nota al siguiente eslabón, una sola vez por pedido. No se puede preguntar ni corregir. |
-| 2 | Conversar y confirmar | Los datos también se ven 8 segundos. Cada dueño publica una nota que ven todos y puede hablar directo con alguien o con todos. El Operativo repite lo entendido (eco) y cada dueño corrige lo que esté mal. |
+| 2 | Conversar y confirmar | Los datos también se ven 8 segundos. Cada dueño publica una nota que ven todos y puede hablar directo con alguien o con todos. El Operativo repite y confirma lo entendido y cada dueño corrige lo que esté mal. |
 
-Lo que se llevan los participantes: la nota clara y compartida, la regla del eco y un compromiso personal.
+Lo que se llevan los participantes: la nota clara y compartida, la regla de repetir y confirmar y un compromiso personal.
 
 ## 4. Puntaje
 
@@ -81,16 +81,16 @@ Controles del panel: iniciar ronda, empezar ya, cerrar ronda, nueva partida, des
 2. Aparece el rol ("Te tocó"), la cadena, las reglas de la ronda y tres pasos. Tocar **Listo**.
 3. Durante la ronda:
    - **Ronda 1:** memorizar los datos (se ven 8 segundos), escribir una nota con ellos y lo que llegó del eslabón anterior, y enviarla. Solo se envía una vez por pedido. El Operativo lee la nota y arma el despacho.
-   - **Ronda 2:** memorizar los datos, publicar la nota (la ven todos), conversar por mensajes directos o para todos, escuchar el eco y corregir si algo no coincide.
+   - **Ronda 2:** memorizar los datos, publicar la nota (la ven todos), conversar por mensajes directos o para todos, escuchar al Operativo repetir y confirmar, y corregir si algo no coincide.
 4. Al terminar el pedido, todo el equipo ve el resultado.
 
 ![Ronda 1: pantalla previa con el rol y las reglas](docs/manual/1-jugador-briefing.png)
 ![Ronda 2: pantalla previa que avisa que ahora sí pueden hablar](docs/manual/7-jugador-briefing-ronda2.png)
 
-Durante la ronda 2 (arriba: camión, datos ocultos y notas de todos; abajo: tu nota, el eco y la conversación):
+Durante la ronda 2 (arriba: camión, datos ocultos y notas de todos; abajo: tu nota, el cuadro de repetir y confirmar y la conversación):
 
 ![Ronda 2: camión, datos ocultos y las notas de todos](docs/manual/2-jugador-ronda2.png)
-![Ronda 2: tu nota, el eco del Operativo y hablar con el equipo](docs/manual/6-jugador-ronda2-chat.png)
+![Ronda 2: tu nota, el Operativo repite y confirma, y hablar con el equipo](docs/manual/6-jugador-ronda2-chat.png)
 
 Diversión incluida:
 - Resultado al instante de cada pedido (puntos, racha de perfectos, qué dato falló, sin revelar el valor real).
@@ -153,4 +153,4 @@ Los paquetes se instalan con `pnpm`, nunca con `npm`.
 
 ## 11. Límites
 
-Simulación con pocas personas y sin grupo de comparación. La nota compartida y el eco son propuestas de diseño del equipo. Los casos son ficticios. Los puntos y las estrellas no demuestran una mejora real en la comunicación.
+Simulación con pocas personas y sin grupo de comparación. La nota compartida y repetir y confirmar son propuestas de diseño del equipo. Los casos son ficticios. Los puntos y las estrellas no demuestran una mejora real en la comunicación.

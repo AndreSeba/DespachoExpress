@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { MISION, NOMBRE_ROL, ORDEN, PASOS, REGLA } from '../lib/constants';
 import { fx } from '../lib/fx';
 import { Hero, Ic, IcRol, Tarjeta, colorRol, toast } from '../lib/ui';
-import { Cadena, Paso, type Ctx } from './util';
+import { AvisoRonda, Cadena, Paso, type Ctx } from './util';
 import { CargaCamion } from '../lib/Camion';
 import type { EstadoJugador } from '../lib/types';
 
@@ -87,15 +87,7 @@ export function Briefing({ c }: { c: Ctx }) {
         <p className="m-0 mt-1 text-white/75">{roles.map((x) => MISION[x]).join(' ')}</p>
       </Hero>
       <section className="panel px-3 py-3"><Cadena S={S} rol={rol} /></section>
-      {k === 'chat' && (
-        <motion.section initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex items-start gap-3 rounded-3xl border-2 border-brand-400 bg-[color-mix(in_oklab,var(--color-brand-500)_9%,var(--surface))] p-4" id="avisoHablar">
-          <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-brand-500 text-2xl text-white shadow-lg"><Ic n="bi-chat-dots-fill" /></span>
-          <div>
-            <div className="text-lg font-extrabold leading-tight">Ahora sí pueden hablar</div>
-            <p className="m-0 mt-1 text-sm">En la ronda 1 no se podía preguntar. Ahora pregunten, confirmen y corrijan entre ustedes. Escriban a <b>todos</b> o <b>solo a una persona</b>.</p>
-          </div>
-        </motion.section>
-      )}
+      <AvisoRonda modo={r.modo} />
       <Tarjeta icono="bi-signpost-split" titulo={k === 'notas' ? 'Así se juega esta ronda' : 'Ahora cambia la forma de comunicarse'}>
         <ul className="m-0 list-none space-y-2.5 p-0">
           {REGLA[k].map(([i, t]) => <li key={t} className="flex items-center gap-3"><span className="titulo-ic shrink-0"><Ic n={i} /></span><span className="font-medium">{t}</span></li>)}

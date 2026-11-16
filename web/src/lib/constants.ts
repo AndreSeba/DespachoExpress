@@ -22,7 +22,7 @@ export const MISION: Record<string, string> = {
 
 export const REGLA = {
   notas: [['bi-eye', 'Ves tus datos unos segundos y se ocultan'], ['bi-pencil-square', 'Escribes una nota de memoria, una sola vez'], ['bi-slash-circle', 'No se puede preguntar ni corregir']],
-  chat: [['bi-chat-dots-fill', 'Ahora sí pueden hablar: con una persona o con todos'], ['bi-eye', 'Ves tus datos unos segundos y se ocultan'], ['bi-journal-text', 'Escribes tu nota y ves las notas de todos'], ['bi-megaphone', 'El Operativo lee el eco y se corrige a tiempo']],
+  chat: [['bi-eye', 'Ves tus datos unos segundos y se ocultan'], ['bi-journal-text', 'Escribes tu nota y ves las notas de todos'], ['bi-chat-dots', 'Hablas con una persona o con todos'], ['bi-megaphone', 'El Operativo repite y confirma; se corrige a tiempo']],
 } as const;
 export const PASOS = {
   notas: [['bi-eye', 'Memoriza tus datos'], ['bi-pencil-square', 'Escribe tu nota'], ['bi-slash-circle', 'Una vez, sin preguntas']],

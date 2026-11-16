@@ -31,7 +31,7 @@ function Recorrido({ S }: { S: EstadoJugador }) {
         </div>
       )) : <p className="muted m-0">No se envió ningún pedido.</p>}
       <div className="mt-3 rounded-2xl bg-[color-mix(in_oklab,#0E9AA7_14%,var(--surface))] p-3 text-sm">
-        <div className="flex items-center gap-1.5 font-semibold"><Ic n="bi-lightbulb" />{notas ? 'Sin retorno, los errores se arrastran hasta el final.' : 'Con eco y correcciones, los errores se detectan antes de despachar.'}</div>
+        <div className="flex items-center gap-1.5 font-semibold"><Ic n="bi-lightbulb" />{notas ? 'Sin retorno, los errores se arrastran hasta el final.' : 'Al repetir y confirmar y corregir, los errores se detectan antes de despachar.'}</div>
         {dif !== null && <div className="mt-1 font-extrabold">{dif >= 0 ? '+' : ''}{dif} puntos frente a la ronda anterior</div>}
         <div className="muted mt-1">Es una simulación con datos ficticios: no prueba una mejora real.</div>
       </div>
@@ -51,7 +51,7 @@ function Logros({ S }: { S: EstadoJugador }) {
   if (res.correcciones > 0) ins.push(['bi-pencil-fill', `${res.correcciones} ${res.correcciones === 1 ? 'corrección' : 'correcciones'} a tiempo`]);
   const antes = S.resumenes[S.resumenes.length - 2];
   if (antes && res.puntos > antes.puntos) ins.push(['bi-graph-up-arrow', 'Más puntos que la ronda anterior']);
-  if (!ins.length) ins.push(['bi-lightbulb', 'A practicar el eco']);
+  if (!ins.length) ins.push(['bi-lightbulb', 'A practicar repetir y confirmar']);
   const hecho = useRef('');
   useEffect(() => {
     const clave = `${res.numero}:${S.fase}`;
@@ -128,6 +128,11 @@ export function Resultado({ S, enviar }: { S: EstadoJugador; enviar: (o: object)
             <span className="dato"><Ic n="bi-envelope" />{res.mensajes} mensajes</span>
             <span className="dato"><Ic n="bi-pencil" />{res.correcciones} correcciones</span>
           </div>
+        </Tarjeta>
+      )}
+      {final && (
+        <Tarjeta id="cierre" icono="bi-broadcast" titulo="Para llevarse">
+          <p className="m-0 text-base font-semibold leading-snug">La comunicación no es una línea: todo el equipo debería saber cómo va la operación y usar todos los medios para comunicarse.</p>
         </Tarjeta>
       )}
       {res && <Recorrido S={S} />}
