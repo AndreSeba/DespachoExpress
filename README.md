@@ -29,7 +29,7 @@ Pensado para mirar y tocar, con poco texto:
 - **Actividad:** línea de tiempo con iconos.
 - **Formulario de satisfacción:** cuando termina el juego, el panel muestra cuántos respondieron, el promedio y la distribución de cada afirmación (barras de colores) y las respuestas abiertas, sin identificar a nadie.
 - **Comparar:** ronda 1 frente a ronda 2 con barras, mapas de aciertos por pedido y el campo más errado.
-- **Controles:** ▶ iniciar ronda, incidente (o automático), ⏹ cerrar, ↺ nueva partida, ⬇ CSV, y ajustes de duración y número de pedidos.
+- **Controles:** ▶ iniciar ronda, ⏹ cerrar, ↺ nueva partida, ⬇ CSV, y ajustes de duración y número de pedidos.
 
 ## Para que sea divertido (jugadores)
 - **Resultado al instante:** cada pedido enviado avisa a todo el equipo con sus puntos, la racha de pedidos perfectos y qué dato falló (sin revelar el valor real).

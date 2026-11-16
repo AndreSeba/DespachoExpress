@@ -21,7 +21,6 @@ export default function Host() {
   const [vista, setVista] = useState<'vivo' | 'cmp'>('vivo');
   const [selPedido, setSelPedido] = useState<number | null>(null);
   const [selCelda, setSelCelda] = useState<string | null>(null);
-  const [auto, setAuto] = useState(false);
   const [drawerRol, setDrawerRol] = useState<string | null>(null);
   const [modalNueva, setModalNueva] = useState(false);
   const sala = useRef<Sala | null>(guardado<Sala>(KEY));
@@ -46,12 +45,6 @@ export default function Host() {
     if (S.fase === 'final' && !yaMostroCmp.current) { setVista('cmp'); yaMostroCmp.current = true; }
     if (S.fase === 'lobby') yaMostroCmp.current = false;
   }, [S?.fase]);
-  const faseRonda = S?.fase;
-  useEffect(() => {
-    if (!auto || faseRonda !== 'ronda') return;
-    const i = setInterval(() => enviarRef.current({ t: 'incidente' }), 40000);
-    return () => clearInterval(i);
-  }, [auto, faseRonda]);
 
   if (!S || S.tipo !== 'host') {
     return <div className="grid min-h-dvh place-items-center"><div className="muted flex items-center gap-2 font-semibold"><Ic n="bi-arrow-repeat" className="animate-spin" />Conectando…</div><Avisos /></div>;
@@ -118,9 +111,7 @@ export default function Host() {
               <Boton icono="bi-stop-fill" clase="btn-ghost btn-block" onClick={() => enviar('reiniciar')}>Cancelar</Boton>
             </>}
             {S.fase === 'ronda' && S.ronda?.estado !== 'preparando' && <>
-              <Boton icono="bi-lightning-charge-fill" clase="btn-primary btn-lg btn-block" accion="incidente" onClick={() => enviar('incidente')}>Incidente</Boton>
               <Boton icono="bi-stop-fill" clase="btn-danger btn-block" accion="cerrar" onClick={() => enviar('cerrar')}>Cerrar ronda</Boton>
-              <Boton icono={auto ? 'bi-toggle-on' : 'bi-toggle-off'} clase="btn-ghost btn-block" onClick={() => setAuto(!auto)}>{auto ? 'Incidentes automáticos: sí' : 'Incidentes automáticos: no'}</Boton>
             </>}
             {S.fase === 'entre' && <Boton icono="bi-play-fill" clase="btn-primary btn-lg btn-block" accion="iniciar" onClick={() => enviar('iniciar')}>Iniciar ronda {S.resumenes.length + 1}</Boton>}
             {S.fase === 'final' && <>

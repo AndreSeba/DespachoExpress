@@ -46,7 +46,7 @@ Lo que se llevan los participantes: la nota clara y compartida, la regla del eco
 - Si los 7 están correctos, bonus de 3 puntos: máximo 10 por pedido.
 - Por defecto: 4 pedidos por ronda y 7 minutos (420 s). Ajustable en el panel.
 - **Camión:** en el panel y en el celular, un camión avanza por la ruta a medida que cada eslabón comunica su dato, llega a la meta al enviarse el despacho y sale de nuevo en el pedido siguiente. También es la pantalla de carga de la sala y del "Listo".
-- **Incidentes:** cambios de último momento que alteran un dato (paro de transporte, cliente adelanta el horario, cambio de muelle, inspección de seguridad, cambio de destino, corrección de cantidad). Pueden dispararse a mano o en automático.
+- **Sin incidentes:** por falta de tiempo, el taller no usa cambios de último momento. El código de los incidentes (producto dañado, refacturación, unidades observadas, entre otros) sigue en el servidor, pero el panel ya no tiene el botón para lanzarlos.
 
 ## 5. Guía para la facilitadora
 
@@ -69,7 +69,7 @@ Entrada: `https://despacho-express.onrender.com/host` (no la página principal, 
 - Descargar el **CSV** (datos por pedido, resumen por ronda y resultados del formulario, sin nombres).
 - **Nueva partida** para reiniciar.
 
-Controles del panel: iniciar ronda, empezar ya, incidente (manual o automático), cerrar ronda, nueva partida, descargar CSV, duración y número de pedidos, completar con bots.
+Controles del panel: iniciar ronda, empezar ya, cerrar ronda, nueva partida, descargar CSV, duración y número de pedidos, completar con bots.
 
 ![Panel: sala con el código y el equipo](docs/manual/3-panel-sala.png)
 ![Panel: ronda 1 en vivo, con el camión y los paquetes viajando por la cadena](docs/manual/4-panel-en-vivo.png)
